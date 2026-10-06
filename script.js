@@ -1,4 +1,4 @@
-const SUPABASE_URL = "https://qdyudmrauanjbvwcacct.supabase.co/rest/v1/";
+const SUPABASE_URL = 'https://qdyudmrauanjbvwcacct.supabase.co'
 const SUPABASE_KEY = "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
 
 let products = [];

@@ -19,7 +19,7 @@ async function loadProducts() {
 
     if (!response.ok) {
       console.log(data);
-      throw new Error("خطا در دریافت محصولات");
+      throw new Error(JSON.stringify(data));
     }
 
     container.innerHTML = data.map(product => `

@@ -73,9 +73,13 @@ async function loadProducts() {
     console.error(error);
 
     container.innerHTML = `
-      <p>
-        دریافت محصولات با مشکل مواجه شد.
-      </p>
+      container.innerHTML = `
+  <p style="direction:rtl; color:#d97899;">
+    خطا: ${error.message}
+  </p>
+`;
+  
+      
     `;
   }
 }

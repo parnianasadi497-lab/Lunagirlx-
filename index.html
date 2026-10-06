@@ -3,12 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luna Girl</title>
+  <title>Luna Girl | لونا گرل</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <h1>لونا گرل 🎀</h1>
-  <p>فروشگاه اکسسوری Luna Girl</p>
+  <header>
+    <div class="logo">🎀 Luna Girl</div>
 
+    <nav>
+      <a href="#home">خانه</a>
+      <a href="#products">محصولات</a>
+      <a href="#about">درباره ما</a>
+    </nav>
+
+    <button class="cart-btn" onclick="openCart()">
+      🛍️ سبد خرید
+      <span id="cart-count">0</span>
+    </button>
+  </header>
+
+  <main>
+
+    <section id="home" class="hero">
+      <p>♡ WELCOME TO LUNA GIRL ♡</p>
+      <h1>اکسسوری‌های خاص برای تو ✨</h1>
+      <p>
+        اکسسوری‌های ظریف و دوست‌داشتنی برای استایل خاص تو.
+      </p>
+      <a href="#products" class="main-btn">مشاهده محصولات</a>
+    </section>
+
+    <section id="products" class="products-section">
+      <p class="small-title">LUNA GIRL COLLECTION</p>
+      <h2>محصولات ما 💗</h2>
+
+      <div id="products-container" class="products-grid">
+        <p>در حال بارگذاری محصولات...</p>
+      </div>
+    </section>
+
+    <section id="about" class="about">
+      <p class="small-title">ABOUT US</p>
+      <h2>درباره لونا گرل 🌙</h2>
+      <p>
+        لونا گرل یک فروشگاه اکسسوری با حال‌وهوای ظریف، دخترانه و مدرن است.
+        هدف ما اینه که اکسسوری مورد علاقه‌ات رو راحت پیدا کنی و باهاش
+        استایل خودت رو کامل کنی.
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    <h3>🎀 Luna Girl</h3>
+    <p>اکسسوری‌های خاص برای تو</p>
+    <p>© 2026 Luna Girl</p>
+  </footer>
+
+  <div id="cart" class="cart">
+    <div class="cart-header">
+      <h2>سبد خرید 🛍️</h2>
+      <button onclick="closeCart()">✕</button>
+    </div>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-total">
+      مجموع: <span id="cart-total">0</span> تومان
+    </div>
+  </div>
+
+  <div id="overlay" onclick="closeCart()"></div>
+
+  <script src="script.js"></script>
 </body>
 </html>

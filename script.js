@@ -1,12 +1,13 @@
 const SUPABASE_URL = "https://qdyudmrauanjbvwcacct.supabase.co/rest/v1/";
 const SUPABASE_KEY = "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
+
 let products = [];
 let cart = [];
 
 
-// ===============================
+// =====================================
 // دریافت محصولات
-// ===============================
+// =====================================
 
 async function loadProducts() {
 
@@ -19,6 +20,7 @@ async function loadProducts() {
       `${SUPABASE_URL}/rest/v1/products?select=*`,
       {
         method: "GET",
+
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${SUPABASE_KEY}`
@@ -26,12 +28,15 @@ async function loadProducts() {
       }
     );
 
-    const text = await response.text();
+
+    const text =
+      await response.text();
+
 
     if (!response.ok) {
 
       container.innerHTML = `
-        <p style="direction:rtl;color:#d97899;">
+        <p style="color:#d97899;direction:rtl;">
           خطا ${response.status}
           <br><br>
           ${text}
@@ -41,7 +46,10 @@ async function loadProducts() {
       return;
     }
 
-    products = JSON.parse(text);
+
+    products =
+      JSON.parse(text);
+
 
     if (products.length === 0) {
 
@@ -52,57 +60,64 @@ async function loadProducts() {
     }
 
 
-    container.innerHTML = products.map(product => `
+    container.innerHTML =
+      products.map(product => `
 
-      <article class="product-card">
+        <article class="product-card">
 
-        ${
-          product.image_url
-            ? `
-              <img
-                class="product-image"
-                src="${product.image_url}"
-                alt="${product.Name}"
-              >
-            `
-            : `
-              <div class="product-image"></div>
-            `
-        }
+          ${
+            product.image_url
 
-        <div class="product-info">
+              ? `
+                <img
+                  class="product-image"
+                  src="${product.image_url}"
+                  alt="${product.Name}"
+                >
+              `
 
-          <h3>
-            ${product.Name}
-          </h3>
+              : `
+                <div class="product-image"></div>
+              `
+          }
 
-          <p class="product-description">
-            ${product.Description || ""}
-          </p>
 
-          <div class="product-price">
-            ${Number(product.Price).toLocaleString("fa-IR")}
-            تومان
+          <div class="product-info">
+
+            <h3>
+              ${product.Name}
+            </h3>
+
+
+            <p class="product-description">
+              ${product.Description || ""}
+            </p>
+
+
+            <div class="product-price">
+              ${Number(product.Price).toLocaleString("fa-IR")}
+              تومان
+            </div>
+
+
+            <button
+              class="add-btn"
+              onclick="addToCart(${product.id})"
+            >
+              افزودن به سبد خرید 🛍️
+            </button>
+
           </div>
 
-          <button
-            class="add-btn"
-            onclick="addToCart(${product.id})"
-          >
-            افزودن به سبد خرید 🛍️
-          </button>
+        </article>
 
-        </div>
-
-      </article>
-
-    `).join("");
+      `).join("");
 
 
   } catch (error) {
 
     container.innerHTML = `
-      <p style="direction:rtl;color:#d97899;">
+      <p style="color:#d97899;direction:rtl;">
         خطای اتصال:
         <br>
         ${error.message}
@@ -114,192 +129,83 @@ async function loadProducts() {
 }
 
 
-// ===============================
-// اضافه کردن محصول به سبد
-// ===============================
+// =====================================
+// پنل مدیریت
+// =====================================
 
-function addToCart(productId) {
+function openAdmin() {
 
-  const product =
-    products.find(p => p.id === productId);
-
-  if (!product) return;
-
-  cart.push(product);
-
-  updateCart();
-
-  openCart();
+  document.getElementById("admin-panel").style.display =
+    "block";
 
 }
 
 
-// ===============================
-// حذف از سبد
-// ===============================
+function closeAdmin() {
 
-function removeFromCart(index) {
-
-  cart.splice(index, 1);
-
-  updateCart();
+  document.getElementById("admin-panel").style.display =
+    "none";
 
 }
 
 
-// ===============================
-// بروزرسانی سبد
-// ===============================
-
-function updateCart() {
-
-  const count =
-    document.getElementById("cart-count");
-
-  const items =
-    document.getElementById("cart-items");
-
-  const total =
-    document.getElementById("cart-total");
-
-
-  count.textContent = cart.length;
-
-
-  if (cart.length === 0) {
-
-    items.innerHTML =
-      "<p>سبد خرید خالی است 🌸</p>";
-
-    total.textContent = "0";
-
-    return;
-  }
-
-
-  items.innerHTML = cart.map(
-    (product, index) => `
-
-      <div class="cart-item">
-
-        <h4>
-          ${product.Name}
-        </h4>
-
-        <p>
-          ${Number(product.Price).toLocaleString("fa-IR")}
-          تومان
-        </p>
-
-        <button
-          class="remove-btn"
-          onclick="removeFromCart(${index})"
-        >
-          حذف
-        </button>
-
-      </div>
-
-    `
-  ).join("");
-
-
-  const sum =
-    cart.reduce(
-      (total, product) =>
-        total + Number(product.Price),
-      0
-    );
-
-
-  total.textContent =
-    sum.toLocaleString("fa-IR");
-
-}
-
-
-// ===============================
-// باز کردن سبد
-// ===============================
-
-function openCart() {
-
-  document
-    .getElementById("cart")
-    .classList.add("open");
-
-  document
-    .getElementById("overlay")
-    .classList.add("show");
-
-}
-
-
-// ===============================
-// بستن سبد
-// ===============================
-
-function closeCart() {
-
-  document
-    .getElementById("cart")
-    .classList.remove("open");
-
-  document
-    .getElementById("overlay")
-    .classList.remove("show");
-
-}
-
-
-// ===============================
-// اضافه کردن محصول از پنل مدیریت
-// ===============================
+// =====================================
+// افزودن محصول
+// =====================================
 
 async function saveProduct() {
 
   const name =
-    document
-      .getElementById("admin-name")
+    document.getElementById("admin-name")
       .value
       .trim();
 
 
   const price =
-    document
-      .getElementById("admin-price")
+    document.getElementById("admin-price")
       .value;
 
 
   const description =
-    document
-      .getElementById("admin-description")
+    document.getElementById("admin-description")
       .value
       .trim();
 
 
   const stock =
-    document
-      .getElementById("admin-stock")
+    document.getElementById("admin-stock")
       .value;
 
 
+  const fileInput =
+    document.getElementById("admin-image-file");
+
+
   const imageFile =
-    document
-      .getElementById("admin-image-file")
-      .files[0];
+    fileInput.files[0];
 
 
   const message =
     document.getElementById("admin-message");
 
 
+  // -----------------------------
   // بررسی اطلاعات
+  // -----------------------------
 
-  if (!name || !price) {
+  if (!name) {
 
     message.textContent =
-      "لطفاً نام و قیمت محصول را وارد کن 🌸";
+      "نام محصول را وارد کن 🌸";
+
+    return;
+  }
+
+
+  if (!price) {
+
+    message.textContent =
+      "قیمت محصول را وارد کن 🌸";
 
     return;
   }
@@ -308,7 +214,7 @@ async function saveProduct() {
   if (!imageFile) {
 
     message.textContent =
-      "لطفاً عکس محصول را انتخاب کن 🖼️";
+      "عکس محصول را انتخاب کن 🖼️";
 
     return;
   }
@@ -321,15 +227,20 @@ async function saveProduct() {
   try {
 
     // -----------------------------
-    // نام یکتا برای عکس
+    // ساخت نام فایل
     // -----------------------------
+
+    const safeName =
+      imageFile.name
+        .replace(/[^a-zA-Z0-9._-]/g, "-");
+
 
     const fileName =
-      `${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+      `${Date.now()}-${safeName}`;
 
 
     // -----------------------------
-    // آپلود عکس به Storage
+    // آپلود به Storage
     // -----------------------------
 
     const uploadResponse =
@@ -360,18 +271,21 @@ async function saveProduct() {
 
     if (!uploadResponse.ok) {
 
-      const error =
+      const errorText =
         await uploadResponse.text();
 
+
       message.textContent =
-        `خطا در آپلود عکس: ${error}`;
+        `خطا در آپلود عکس:
+        ${errorText}`;
+
 
       return;
     }
 
 
     // -----------------------------
-    // آدرس عمومی عکس
+    // URL عکس
     // -----------------------------
 
     const imageUrl =
@@ -379,11 +293,11 @@ async function saveProduct() {
 
 
     message.textContent =
-      "عکس آپلود شد... در حال ذخیره محصول 💗";
+      "عکس آپلود شد 💗";
 
 
     // -----------------------------
-    // ذخیره محصول در جدول
+    // ثبت محصول
     // -----------------------------
 
     const productResponse =
@@ -429,18 +343,21 @@ async function saveProduct() {
 
     if (!productResponse.ok) {
 
-      const error =
+      const errorText =
         await productResponse.text();
 
+
       message.textContent =
-        `خطا در ذخیره محصول: ${error}`;
+        `خطا در ثبت محصول:
+        ${errorText}`;
+
 
       return;
     }
 
 
     // -----------------------------
-    // موفق شد
+    // موفقیت
     // -----------------------------
 
     message.textContent =
@@ -465,13 +382,9 @@ async function saveProduct() {
     await loadProducts();
 
 
-    // بستن پنل بعد از کمی تأخیر
-
     setTimeout(() => {
 
-      if (typeof closeAdmin === "function") {
-        closeAdmin();
-      }
+      closeAdmin();
 
     }, 1000);
 
@@ -486,8 +399,142 @@ async function saveProduct() {
 }
 
 
-// ===============================
-// شروع سایت
-// ===============================
+// =====================================
+// سبد خرید
+// =====================================
+
+function addToCart(productId) {
+
+  const product =
+    products.find(
+      p => p.id === productId
+    );
+
+
+  if (!product) return;
+
+
+  cart.push(product);
+
+  updateCart();
+
+  openCart();
+
+}
+
+
+function removeFromCart(index) {
+
+  cart.splice(index, 1);
+
+  updateCart();
+
+}
+
+
+function updateCart() {
+
+  const count =
+    document.getElementById("cart-count");
+
+
+  const items =
+    document.getElementById("cart-items");
+
+
+  const total =
+    document.getElementById("cart-total");
+
+
+  count.textContent =
+    cart.length;
+
+
+  if (cart.length === 0) {
+
+    items.innerHTML =
+      "<p>سبد خرید خالی است 🌸</p>";
+
+    total.textContent =
+      "0";
+
+    return;
+  }
+
+
+  items.innerHTML =
+    cart.map(
+      (product, index) => `
+
+        <div class="cart-item">
+
+          <h4>
+            ${product.Name}
+          </h4>
+
+          <p>
+            ${Number(product.Price).toLocaleString("fa-IR")}
+            تومان
+          </p>
+
+          <button
+            class="remove-btn"
+            onclick="removeFromCart(${index})"
+          >
+            حذف
+          </button>
+
+        </div>
+
+      `
+    ).join("");
+
+
+  const sum =
+    cart.reduce(
+      (total, product) =>
+        total + Number(product.Price),
+
+      0
+    );
+
+
+  total.textContent =
+    sum.toLocaleString("fa-IR");
+
+}
+
+
+function openCart() {
+
+  document
+    .getElementById("cart")
+    .classList.add("open");
+
+
+  document
+    .getElementById("overlay")
+    .classList.add("show");
+
+}
+
+
+function closeCart() {
+
+  document
+    .getElementById("cart")
+    .classList.remove("open");
+
+
+  document
+    .getElementById("overlay")
+    .classList.remove("show");
+
+}
+
+
+// =====================================
+// شروع
+// =====================================
 
 loadProducts();

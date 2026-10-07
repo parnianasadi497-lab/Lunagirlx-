@@ -5,10 +5,6 @@
 const SUPABASE_URL =
   "https://qdyudmrauanjbvwcacct.supabase.co";
 
-/*
-  sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR
-
-*/
 const SUPABASE_KEY =
   "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR
 ";

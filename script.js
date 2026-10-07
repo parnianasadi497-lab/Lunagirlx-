@@ -3,11 +3,9 @@ const SUPABASE_URL = “https://qdyudmrauanjbvwcacct.supabase.co”;
 const SUPABASE_KEY =
 “sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR”;
 
-const ADMIN_ID =
-“ac82e56f-d171-402e-a0f6-8664ec1be7ba”;
+const ADMIN_ID = “ac82e56f-d171-402e-a0f6-8664ec1be7ba”;
 
-const supabaseClient =
-supabase.createClient(
+const supabaseClient = supabase.createClient(
 SUPABASE_URL,
 SUPABASE_KEY
 );
@@ -16,723 +14,102 @@ let products = [];
 let cart = [];
 
 /* =========================
+HELPERS
+========================= */
+
+function formatPrice(price) {
+return Number(price || 0).toLocaleString(“fa-IR”) + “ تومان”;
+}
+
+function showModal(id) {
+const element = document.getElementById(id);
+if (element) element.classList.add(“active”);
+}
+
+function hideModal(id) {
+const element = document.getElementById(id);
+if (element) element.classList.remove(“active”);
+}
+
+function escapeHtml(value) {
+return String(value ?? “”)
+.replace(/&/g, “&”)
+.replace(/</g, “<”)
+.replace(/>/g, “>”)
+.replace(/”/g, “"”)
+.replace(/’/g, “'”);
+}
+
+/* =========================
 PRODUCTS
 ========================= */
 
 async function loadProducts() {
 
-const container =
-document.getElementById(
-“products-container”
-);
-
-try {
-
-const response =
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/products?select=*`,
-    {
-      method: "GET",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${SUPABASE_KEY}`
-      }
-    }
-  );
-const text =
-  await response.text();
-if (!response.ok) {
-  container.innerHTML =
-    `<p style="color:#d97899;">
-      خطا ${response.status}
-      <br><br>
-      ${text}
-    </p>`;
-  return;
-}
-products =
-  JSON.parse(text);
-if (!products.length) {
-  container.innerHTML =
-    "<p>هنوز محصولی اضافه نشده است 🌸</p>";
-  return;
-}
-container.innerHTML =
-  products.map(product => `
-    <article class="product-card">
-      ${
-        product.image_url
-        ?
-        `<img
-          class="product-image"
-          src="${product.image_url}"
-          alt="${product.Name}"
-        >`
-        :
-        `<div class="product-image"></div>`
-      }
-      <div class="product-info">
-        <h3>
-          ${product.Name}
-        </h3>
-        <p class="product-description">
-          ${product.Description || ""}
-        </p>
-        <div class="product-price">
-          ${Number(product.Price)
-            .toLocaleString("fa-IR")}
-          تومان
-        </div>
-        <button
-          class="add-btn"
-          onclick="addToCart(${product.id})"
-        >
-          افزودن به سبد خرید 🛍️
-        </button>
-      </div>
-    </article>
-  `).join("");
-
-}
-
-catch (error) {
-
-container.innerHTML =
-  `<p style="color:#d97899;">
-    خطای اتصال:
-    <br>
-    ${error.message}
-  </p>`;
-
-}
-
-}
-
-/* =========================
-ADMIN LOGIN
-========================= */
-
-function openAdminLogin() {
-
-document
-.getElementById(“admin-login-modal”)
-.classList.add(“show”);
-
-}
-
-function closeAdminLogin() {
-
-document
-.getElementById(“admin-login-modal”)
-.classList.remove(“show”);
-
-}
-
-async function adminLogin(event) {
-
-event.preventDefault();
-
-const email =
-document
-.getElementById(“admin-email”)
-.value
-.trim();
-
-const password =
-document
-.getElementById(“admin-password”)
-.value;
-
-const message =
-document
-.getElementById(“login-message”);
-
-message.textContent =
-“در حال ورود… ⏳”;
-
-const {
-data,
-error
-} =
-await supabaseClient.auth
-.signInWithPassword({
-email,
-password
-});
-
-if (error) {
-
-message.textContent =
-  "ایمیل یا رمز عبور اشتباه است.";
-return;
-
-}
-
-if (
-!data.user ||
-data.user.id !== ADMIN_ID
-) {
-
-await supabaseClient.auth.signOut();
-message.textContent =
-  "این حساب اجازه ورود به پنل مدیریت را ندارد.";
-return;
-
-}
-
-message.textContent =
-“ورود موفق بود 🎀”;
-
-document
-.getElementById(“admin-email”)
-.value = “”;
-
-document
-.getElementById(“admin-password”)
-.value = “”;
-
-setTimeout(() => {
-
-closeAdminLogin();
-openAdminPanel();
-
-}, 500);
-
-}
-
-/* =========================
-ADMIN PANEL
-========================= */
-
-async function openAdminPanel() {
-
-const {
-data
-} =
-await supabaseClient.auth
-.getSession();
-
-const session =
-data.session;
-
-if (
-!session ||
-!session.user ||
-session.user.id !== ADMIN_ID
-) {
-
-openAdminLogin();
-return;
-
-}
-
-document
-.getElementById(“admin-panel”)
-.classList.add(“show”);
-
-await loadOrders();
-
-}
-
-function closeAdmin() {
-
-document
-.getElementById(“admin-panel”)
-.classList.remove(“show”);
-
-}
-
-async function adminLogout() {
-
-await supabaseClient.auth.signOut();
-
-closeAdmin();
-
-alert(
-“از پنل مدیریت خارج شدی 🌸”
-);
-
-}
-
-/* =========================
-SAVE PRODUCT
-========================= */
-
-async function saveProduct() {
-
-const name =
-document
-.getElementById(“admin-name”)
-.value
-.trim();
-
-const price =
-document
-.getElementById(“admin-price”)
-.value;
-
-const description =
-document
-.getElementById(“admin-description”)
-.value
-.trim();
-
-const stock =
-document
-.getElementById(“admin-stock”)
-.value;
-
-const fileInput =
-document
-.getElementById(“admin-image-file”);
-
-const imageFile =
-fileInput.files[0];
-
-const message =
-document
-.getElementById(“admin-message”);
-
-if (!name) {
-
-message.textContent =
-  "نام محصول را وارد کن 🌸";
-return;
-
-}
-
-if (!price) {
-
-message.textContent =
-  "قیمت محصول را وارد کن 🌸";
-return;
-
-}
-
-if (!imageFile) {
-
-message.textContent =
-  "عکس محصول را انتخاب کن 🖼️";
-return;
-
-}
-
-const {
-data
-} =
-await supabaseClient.auth
-.getSession();
-
-const session =
-data.session;
-
-if (
-!session ||
-session.user.id !== ADMIN_ID
-) {
-
-message.textContent =
-  "ابتدا وارد حساب مدیر شو.";
-return;
-
-}
-
-try {
-
-message.textContent =
-  "در حال آپلود عکس... ⏳";
-const safeName =
-  imageFile.name
-    .replace(
-      /[^a-zA-Z0-9._-]/g,
-      "-"
-    );
-const fileName =
-  `${Date.now()}-${safeName}`;
-const uploadResponse =
-  await fetch(
-    `${SUPABASE_URL}/storage/v1/object/products/${fileName}`,
-    {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${session.access_token}`,
-        "Content-Type":
-          imageFile.type
-      },
-      body: imageFile
-    }
-  );
-if (!uploadResponse.ok) {
-  const errorText =
-    await uploadResponse.text();
-  message.textContent =
-    `خطا در آپلود عکس:
-    ${errorText}`;
-  return;
-}
-const imageUrl =
-  `${SUPABASE_URL}/storage/v1/object/public/products/${fileName}`;
-message.textContent =
-  "عکس آپلود شد 💗";
-const productResponse =
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/products`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-        "apikey":
-          SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${session.access_token}`,
-        "Prefer":
-          "return=minimal"
-      },
-      body: JSON.stringify({
-        Name:
-          name,
-        Price:
-          Number(price),
-        Description:
-          description,
-        image_url:
-          imageUrl,
-        stock:
-          Number(stock || 0)
-      })
-    }
-  );
-if (!productResponse.ok) {
-  const errorText =
-    await productResponse.text();
-  message.textContent =
-    `خطا در ثبت محصول:
-    ${errorText}`;
-  return;
-}
-message.textContent =
-  "محصول با موفقیت اضافه شد 🎀";
-document
-  .getElementById("admin-name")
-  .value = "";
-document
-  .getElementById("admin-price")
-  .value = "";
-document
-  .getElementById("admin-description")
-  .value = "";
-document
-  .getElementById("admin-stock")
-  .value = "";
-document
-  .getElementById("admin-image-file")
-  .value = "";
-await loadProducts();
-setTimeout(() => {
-  message.textContent = "";
-}, 2000);
-
-}
-
-catch (error) {
-
-message.textContent =
-  "خطای اتصال: " +
-  error.message;
-
-}
-
-}
-
-/* =========================
-ORDERS
-========================= */
-
-async function loadOrders() {
-
-const container =
-document.getElementById(
-“orders-container”
-);
+const container = document.getElementById(“products-container”);
 
 if (!container) return;
 
 container.innerHTML =
-“در حال دریافت سفارش‌ها… ⏳”;
-
-const {
-data
-} =
-await supabaseClient.auth
-.getSession();
-
-const session =
-data.session;
-
-if (
-!session ||
-!session.user ||
-session.user.id !== ADMIN_ID
-) {
-
-container.innerHTML =
-  "<p>برای مشاهده سفارش‌ها باید وارد حساب مدیر باشی.</p>";
-return;
-
-}
+‘در حال بارگذاری محصولات…’;
 
 try {
 
-const response =
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`,
-    {
-      method: "GET",
-      headers: {
-        "apikey":
-          SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${session.access_token}`
-      }
-    }
-  );
-const text =
-  await response.text();
-if (!response.ok) {
+const { data, error } = await supabaseClient
+  .from("products")
+  .select("*")
+  .order("created_at", { ascending: false });
+if (error) {
+  console.error(error);
   container.innerHTML =
-    `<p style="color:#d97899;">
-      خطا در دریافت سفارش‌ها:
-      <br><br>
-      ${text}
-    </p>`;
+    '<p class="loading">نمایش محصولات با مشکل مواجه شد.</p>';
   return;
 }
-const orders =
-  JSON.parse(text);
-if (!orders.length) {
+products = data || [];
+if (products.length === 0) {
   container.innerHTML =
-    "<p>هنوز سفارشی ثبت نشده است 🌸</p>";
+    '<p class="empty">هنوز محصولی اضافه نشده ♡</p>';
   return;
 }
-container.innerHTML =
-  orders.map(order => {
-    let itemsText = "";
-    try {
-      const items =
-        Array.isArray(order.items)
-          ? order.items
-          : [];
-      itemsText =
-        items.map(item => {
-          const name =
-            item.Name || "محصول";
-          const price =
-            Number(item.Price || 0)
-              .toLocaleString("fa-IR");
-          return `
-            <div>
-              ${name}
-              — ${price} تومان
-            </div>
-          `;
-        }).join("");
-    }
-    catch (e) {
-      itemsText =
-        "اطلاعات محصولات قابل نمایش نیست.";
-    }
-    const date =
-      order.created_at
-        ? new Date(order.created_at)
-            .toLocaleString("fa-IR")
-        : "نامشخص";
-    return `
-      <div class="order-card">
-        <div class="order-card-header">
-          <strong>
-            سفارش #${order.id}
-          </strong>
-          <span>
-            ${date}
-          </span>
-        </div>
-        <div class="order-info">
-          <p>
-            <strong>مشتری:</strong>
-            ${order.first_name || ""}
-            ${order.last_name || ""}
-          </p>
-          <p>
-            <strong>تلفن:</strong>
-            ${order.phone || "-"}
-          </p>
-          <p>
-            <strong>استان:</strong>
-            ${order.province || "-"}
-          </p>
-          <p>
-            <strong>شهر:</strong>
-            ${order.city || "-"}
-          </p>
-          <p>
-            <strong>آدرس:</strong>
-            ${order.address || "-"}
-          </p>
-          <p>
-            <strong>کد پستی:</strong>
-            ${order.postal_code || "-"}
-          </p>
-        </div>
-        <div class="order-products">
-          <strong>
-            🛍️ محصولات:
-          </strong>
-          <div>
-            ${itemsText || "بدون اطلاعات"}
-          </div>
-        </div>
-        <div class="order-bottom">
-          <strong>
-            مبلغ:
-            ${Number(order.total || 0)
-              .toLocaleString("fa-IR")}
-            تومان
-          </strong>
-          <select
-            onchange="updateOrderStatus(${order.id}, this.value)"
-          >
-            <option
-              value="جدید"
-              ${order.status === "جدید" ? "selected" : ""}
-            >
-              جدید
-            </option>
-            <option
-              value="در حال آماده‌سازی"
-              ${order.status === "در حال آماده‌سازی" ? "selected" : ""}
-            >
-              در حال آماده‌سازی
-            </option>
-            <option
-              value="ارسال‌شده"
-              ${order.status === "ارسال‌شده" ? "selected" : ""}
-            >
-              ارسال‌شده
-            </option>
-            <option
-              value="تحویل‌شده"
-              ${order.status === "تحویل‌شده" ? "selected" : ""}
-            >
-              تحویل‌شده
-            </option>
-            <option
-              value="لغوشده"
-              ${order.status === "لغوشده" ? "selected" : ""}
-            >
-              لغوشده
-            </option>
-          </select>
-        </div>
+container.innerHTML = "";
+products.forEach(product => {
+  const card = document.createElement("div");
+  card.className = "product-card";
+  const image =
+    product.image_url ||
+    "https://via.placeholder.com/600x600?text=Luna+Girl";
+  card.innerHTML = `
+    <img
+      class="product-image"
+      src="${image}"
+      alt="${escapeHtml(product.Name || "محصول")}"
+    >
+    <div class="product-info">
+      <h3>${escapeHtml(product.Name || "محصول")}</h3>
+      <p class="product-description">
+        ${escapeHtml(product.Description || "")}
+      </p>
+      <div class="product-price">
+        ${formatPrice(product.Price)}
       </div>
-    `;
-  }).join("");
+      <button
+        class="add-cart-btn"
+        onclick="addToCart(${Number(product.id)})"
+      >
+        افزودن به سبد 🛍️
+      </button>
+    </div>
+  `;
+  container.appendChild(card);
+});
 
-}
+} catch (error) {
 
-catch (error) {
-
+console.error(error);
 container.innerHTML =
-  `<p style="color:#d97899;">
-    خطای اتصال:
-    <br>
-    ${error.message}
-  </p>`;
+  '<p class="loading">خطایی در اتصال به فروشگاه رخ داد.</p>';
 
 }
-
-}
-
-/* =========================
-UPDATE ORDER STATUS
-========================= */
-
-async function updateOrderStatus(
-orderId,
-newStatus
-) {
-
-const {
-data
-} =
-await supabaseClient.auth
-.getSession();
-
-const session =
-data.session;
-
-if (
-!session ||
-!session.user ||
-session.user.id !== ADMIN_ID
-) {
-
-alert(
-  "دسترسی مدیر لازم است."
-);
-return;
-
-}
-
-try {
-
-const response =
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type":
-          "application/json",
-        "apikey":
-          SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${session.access_token}`,
-        "Prefer":
-          "return=minimal"
-      },
-      body: JSON.stringify({
-        status: newStatus
-      })
-    }
-  );
-if (!response.ok) {
-  const errorText =
-    await response.text();
-  alert(
-    "خطا در تغییر وضعیت سفارش:\n" +
-    errorText
-  );
-  return;
-}
-alert(
-  "وضعیت سفارش تغییر کرد 🎀"
-);
-
-}
-
-catch (error) {
-
-alert(
-  "خطای اتصال: " +
-  error.message
-);
-
-}
-
 }
 
 /* =========================
@@ -741,354 +118,179 @@ CART
 
 function addToCart(productId) {
 
-const product =
-products.find(
-p => p.id === productId
+const product = products.find(
+item => Number(item.id) === Number(productId)
 );
 
 if (!product) return;
 
-cart.push(product);
+const existing = cart.find(
+item => Number(item.id) === Number(productId)
+);
 
-updateCart();
-
-openCart();
-
+if (existing) {
+existing.quantity += 1;
+} else {
+cart.push({
+…product,
+quantity: 1
+});
 }
 
-function removeFromCart(index) {
-
-cart.splice(index, 1);
-
 updateCart();
 
+alert(“محصول به سبد خرید اضافه شد 🛍️”);
+}
+
+function removeFromCart(productId) {
+
+cart = cart.filter(
+item => Number(item.id) !== Number(productId)
+);
+
+updateCart();
 }
 
 function updateCart() {
 
-const count =
-document.getElementById(
-“cart-count”
+const countElement =
+document.getElementById(“cart-count”);
+
+const itemsElement =
+document.getElementById(“cart-items”);
+
+const totalElement =
+document.getElementById(“cart-total”);
+
+const count = cart.reduce(
+(sum, item) => sum + item.quantity,
+0
 );
 
-const items =
-document.getElementById(
-“cart-items”
-);
+if (countElement) {
+countElement.textContent =
+count.toLocaleString(“fa-IR”);
+}
 
-const total =
-document.getElementById(
-“cart-total”
-);
+if (!itemsElement || !totalElement) return;
 
-count.textContent =
-cart.length;
+if (cart.length === 0) {
 
-if (!cart.length) {
-
-items.innerHTML =
-  "<p>سبد خرید خالی است 🌸</p>";
-total.textContent =
-  "0";
+itemsElement.innerHTML =
+  '<p class="empty">سبد خرید خالیه ♡</p>';
+totalElement.textContent = "۰ تومان";
 return;
 
 }
 
-items.innerHTML =
-cart.map(
-(product, index) => `
+let total = 0;
 
-    <div class="cart-item">
-      <h4>
-        ${product.Name}
-      </h4>
-      <p>
-        ${Number(product.Price)
-          .toLocaleString("fa-IR")}
-        تومان
-      </p>
-      <button
-        class="remove-btn"
-        onclick="removeFromCart(${index})"
-      >
-        حذف
-      </button>
+itemsElement.innerHTML = “”;
+
+cart.forEach(item => {
+
+total += Number(item.Price || 0) * item.quantity;
+const image =
+  item.image_url ||
+  "https://via.placeholder.com/150?text=Luna";
+const div = document.createElement("div");
+div.className = "cart-item";
+div.innerHTML = `
+  <img src="${image}" alt="">
+  <div class="cart-item-info">
+    <strong>${escapeHtml(item.Name)}</strong>
+    <div>
+      ${item.quantity.toLocaleString("fa-IR")} ×
+      ${formatPrice(item.Price)}
     </div>
-  `
-).join("");
+  </div>
+  <button
+    class="cart-item-remove"
+    onclick="removeFromCart(${Number(item.id)})"
+  >
+    حذف
+  </button>
+`;
+itemsElement.appendChild(div);
 
-const sum =
-cart.reduce(
-(total, product) =>
-total +
-Number(product.Price),
-0
-);
+});
 
-total.textContent =
-sum.toLocaleString(“fa-IR”);
-
+totalElement.textContent = formatPrice(total);
 }
 
 function openCart() {
-
-document
-.getElementById(“cart”)
-.classList.add(“open”);
-
-document
-.getElementById(“overlay”)
-.classList.add(“show”);
-
+updateCart();
+showModal(“cart-modal”);
 }
 
 function closeCart() {
-
-document
-.getElementById(“cart”)
-.classList.remove(“open”);
-
-document
-.getElementById(“overlay”)
-.classList.remove(“show”);
-
+hideModal(“cart-modal”);
 }
 
 /* =========================
-CHECKOUT
+ADMIN LOGIN
 ========================= */
 
-function openCheckout() {
-
-if (!cart.length) {
-
-alert(
-  "سبد خریدت خالیه 🌸"
-);
-return;
-
+function openAdminLogin() {
+showModal(“admin-login-modal”);
 }
 
-const total =
-cart.reduce(
-(sum, product) =>
-sum +
-Number(product.Price),
-0
-);
-
-document
-.getElementById(“checkout-total”)
-.textContent =
-total.toLocaleString(“fa-IR”);
-
-document
-.getElementById(“checkout-message”)
-.textContent = “”;
-
-document
-.getElementById(“checkout-modal”)
-.classList.add(“show”);
-
+function closeAdminLogin() {
+hideModal(“admin-login-modal”);
 }
 
-function closeCheckout() {
+async function adminLogin() {
 
-document
-.getElementById(“checkout-modal”)
-.classList.remove(“show”);
+const email =
+document.getElementById(“admin-email”).value.trim();
 
-}
-
-/* =========================
-SUBMIT ORDER
-========================= */
-
-async function submitOrder(event) {
-
-event.preventDefault();
-
-if (!cart.length) {
-
-alert(
-  "سبد خرید خالی است 🌸"
-);
-return;
-
-}
+const password =
+document.getElementById(“admin-password”).value;
 
 const message =
-document.getElementById(
-“checkout-message”
-);
+document.getElementById(“admin-login-message”);
+
+if (!email || !password) {
 
 message.textContent =
-“در حال ثبت سفارش… ⏳”;
+  "ایمیل و رمز عبور را وارد کن.";
+return;
 
-const firstName =
-document
-.getElementById(“first-name”)
-.value
-.trim();
+}
 
-const lastName =
-document
-.getElementById(“last-name”)
-.value
-.trim();
-
-const province =
-document
-.getElementById(“province”)
-.value
-.trim();
-
-const city =
-document
-.getElementById(“city”)
-.value
-.trim();
-
-const address =
-document
-.getElementById(“address”)
-.value
-.trim();
-
-const postalCode =
-document
-.getElementById(“postal-code”)
-.value
-.trim();
-
-const phone =
-document
-.getElementById(“phone”)
-.value
-.trim();
-
-const total =
-cart.reduce(
-(sum, product) =>
-sum +
-Number(product.Price),
-0
-);
-
-const orderItems =
-cart.map(product => ({
-
-  id:
-    product.id,
-  Name:
-    product.Name,
-  Price:
-    Number(product.Price),
-  image_url:
-    product.image_url || ""
-}));
+message.textContent = “در حال ورود…”;
 
 try {
 
-const response =
-  await fetch(
-    `${SUPABASE_URL}/rest/v1/orders`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-        "apikey":
-          SUPABASE_KEY,
-        "Authorization":
-          `Bearer ${SUPABASE_KEY}`,
-        "Prefer":
-          "return=representation"
-      },
-      body: JSON.stringify({
-        first_name:
-          firstName,
-        last_name:
-          lastName,
-        phone:
-          phone,
-        province:
-          province,
-        city:
-          city,
-        address:
-          address,
-        postal_code:
-          postalCode,
-        items:
-          orderItems,
-        total:
-          total,
-        status:
-          "جدید"
-      })
-    }
-  );
-const responseText =
-  await response.text();
-if (!response.ok) {
+const { data, error } =
+  await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+if (error) {
+  console.error(error);
   message.textContent =
-    "خطا در ثبت سفارش.";
-  console.error(
-    "Order error:",
-    responseText
-  );
+    "ایمیل یا رمز عبور اشتباه است.";
   return;
 }
+if (!data.user || data.user.id !== ADMIN_ID) {
+  await supabaseClient.auth.signOut();
+  message.textContent =
+    "این حساب اجازه ورود به پنل مدیریت را ندارد.";
+  return;
+}
+closeAdminLogin();
+await openAdminPanel();
+
+} catch (error) {
+
+console.error(error);
 message.textContent =
-  "سفارش با موفقیت ثبت شد 🎀";
-alert(
-  "سفارش شما با موفقیت ثبت شد 💗"
-);
-document
-  .getElementById("first-name")
-  .value = "";
-document
-  .getElementById("last-name")
-  .value = "";
-document
-  .getElementById("province")
-  .value = "";
-document
-  .getElementById("city")
-  .value = "";
-document
-  .getElementById("address")
-  .value = "";
-document
-  .getElementById("postal-code")
-  .value = "";
-document
-  .getElementById("phone")
-  .value = "";
-cart = [];
-updateCart();
-setTimeout(() => {
-  closeCheckout();
-  closeCart();
-}, 1000);
+  "خطایی در ورود رخ داد.";
 
 }
-
-catch (error) {
-
-message.textContent =
-  "خطای اتصال: " +
-  error.message;
-
-}
-
 }
 
 /* =========================
-INITIALIZE
+ADMIN PANEL
 ========================= */
-
-loadProducts();
-
-updateCart();

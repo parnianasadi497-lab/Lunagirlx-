@@ -1,215 +1,488 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Luna Girl | لونا گرل</title>
+
   <link rel="stylesheet" href="style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
+
 <header class="site-header">
-  <div class="logo">Luna Girl ✦</div>
+
+  <div class="logo">
+    Luna Girl ✦
+  </div>
+
   <nav>
     <a href="#home">خانه</a>
     <a href="#products">محصولات</a>
     <a href="#about">درباره ما</a>
   </nav>
-  <div class="header-actions">
-    <button onclick="openAdminLogin()" class="admin-btn">🔐 مدیریت</button>
-    <button onclick="openCart()" class="cart-btn">
+
+  <div
+    class="header-actions"
+    style="display:flex !important; visibility:visible !important;"
+  >
+
+    <button
+      onclick="openAdminLogin()"
+      class="admin-btn"
+      style="display:inline-flex !important; visibility:visible !important;"
+    >
+      🔐 مدیریت
+    </button>
+
+    <button
+      onclick="openCart()"
+      class="cart-btn"
+    >
       🛍️ سبد خرید
       <span id="cart-count">0</span>
     </button>
+
   </div>
+
 </header>
+
+
 <main>
-<section id="home" class="hero">
-  <div class="hero-content">
-    <span class="hero-small">WELCOME TO</span>
-    <h1>Luna Girl</h1>
-    <p>اکسسوری‌های خاص برای دخترهای خاص ✨</p>
-<a href="#products" class="hero-btn">مشاهده محصولات</a>
-  </div>
-</section>
-<section id="products" class="products-section">
-  <div class="section-title">
-    <span>✦</span>
-    <h2>محصولات لونا گرل</h2>
-    <span>✦</span>
-  </div>
-  <p class="section-subtitle">
-    چیزای کوچولویی که استایلت رو خاص‌تر می‌کنن ♡
-  </p>
-  <div id="products-container" class="products-grid">
-    <p class="loading">در حال بارگذاری محصولات...</p>
-  </div>
-</section>
-<section id="about" class="about-section">
-  <div class="about-card">
-    <span class="about-icon">🌙</span>
-    <h2>درباره Luna Girl</h2>
-    <p>
-      لونا گرل یه فروشگاه کوچیک و دوست‌داشتنی برای اکسسوری‌های خاص،
-      ظریف و دخترونه‌ست. هر محصول با عشق انتخاب شده تا یه تیکه از
-      استایل خودت باشه. ♡
-    </p>
-  </div>
-</section>
-</main>
-<footer>
-  <div class="footer-logo">Luna Girl ✦</div>
-  <p>Made with love ♡</p>
-</footer>
-<!-- CART -->
-<div id="cart-modal" class="modal">
-  <div class="modal-content cart-content">
-<button class="close-btn" onclick="closeCart()">×</button>
-<h2>🛍️ سبد خرید</h2>
-<div id="cart-items"></div>
-<div class="cart-total">
-  مجموع:
-  <strong id="cart-total">۰ تومان</strong>
-</div>
-<button onclick="openCheckout()" class="main-btn">
-  ادامه و ثبت سفارش
-</button>
-  </div>
-</div>
-<!-- ADMIN LOGIN -->
-<div id="admin-login-modal" class="modal">
-  <div class="modal-content">
-<button class="close-btn" onclick="closeAdminLogin()">×</button>
-<h2>🔐 ورود مدیریت</h2>
-<input
-  id="admin-email"
-  type="email"
-  placeholder="ایمیل مدیر"
->
-<input
-  id="admin-password"
-  type="password"
-  placeholder="رمز عبور"
->
-<button onclick="adminLogin()" class="main-btn">
-  ورود
-</button>
-<p id="admin-login-message"></p>
-  </div>
-</div>
-<!-- ADMIN PANEL -->
-<div id="admin-panel-modal" class="modal">
-  <div class="modal-content admin-content">
-<button class="close-btn" onclick="closeAdminPanel()">×</button>
-<div class="admin-title">
-  <h2>⚙️ پنل مدیریت Luna Girl</h2>
-  <button onclick="adminLogout()" class="logout-btn">
-    خروج
-  </button>
-</div>
-<!-- ADD PRODUCT -->
-<div class="admin-section">
-  <h3>➕ افزودن محصول</h3>
-  <input
-    id="product-name"
-    type="text"
-    placeholder="نام محصول"
-  >
-  <input
-    id="product-price"
-    type="number"
-    placeholder="قیمت به تومان"
-  >
-  <textarea
-    id="product-description"
-    placeholder="توضیحات محصول"
-  ></textarea>
-  <input
-    id="product-stock"
-    type="number"
-    placeholder="موجودی"
-  >
-  <input
-    id="product-image"
-    type="file"
-    accept="image/*"
-  >
-  <button onclick="saveProduct()" class="main-btn">
-    ذخیره محصول
-  </button>
-  <p id="product-message"></p>
-</div>
-<!-- ORDERS -->
-<div class="admin-section orders-section">
-  <div class="orders-header">
-    <div>
-      <h3>📦 سفارش‌های مشتریان</h3>
-      <p>سفارش‌های ثبت‌شده را از اینجا ببین.</p>
+
+  <!-- HERO -->
+
+  <section id="home" class="hero">
+
+    <div class="hero-content">
+
+      <span class="hero-small">
+        WELCOME TO
+      </span>
+
+      <h1>
+        Luna Girl
+      </h1>
+
+      <p>
+        اکسسوری‌های خاص برای دخترهای خاص ✨
+      </p>
+
+      <a
+        href="#products"
+        class="hero-btn"
+      >
+        مشاهده محصولات
+      </a>
+
     </div>
-    <button onclick="loadOrders()" class="refresh-btn">
-      🔄 بروزرسانی
+
+  </section>
+
+
+  <!-- PRODUCTS -->
+
+  <section
+    id="products"
+    class="products-section"
+  >
+
+    <div class="section-title">
+
+      <span>✦</span>
+
+      <h2>
+        محصولات لونا گرل
+      </h2>
+
+      <span>✦</span>
+
+    </div>
+
+    <p class="section-subtitle">
+      چیزای کوچولویی که استایلت رو خاص‌تر می‌کنن ♡
+    </p>
+
+    <div
+      id="products-container"
+      class="products-grid"
+    >
+
+      <p class="loading">
+        در حال بارگذاری محصولات...
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ABOUT -->
+
+  <section
+    id="about"
+    class="about-section"
+  >
+
+    <div class="about-card">
+
+      <span class="about-icon">
+        🌙
+      </span>
+
+      <h2>
+        درباره Luna Girl
+      </h2>
+
+      <p>
+        لونا گرل یه فروشگاه کوچیک و دوست‌داشتنی
+        برای اکسسوری‌های خاص، ظریف و دخترونه‌ست.
+        هر محصول با عشق انتخاب شده تا یه تیکه
+        از استایل خودت باشه. ♡
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+  <div class="footer-logo">
+    Luna Girl ✦
+  </div>
+
+  <p>
+    Made with love ♡
+  </p>
+
+</footer>
+
+
+<!-- =========================
+     CART MODAL
+========================= -->
+
+<div
+  id="cart-modal"
+  class="modal"
+>
+
+  <div class="modal-content cart-content">
+
+    <button
+      class="close-btn"
+      onclick="closeCart()"
+    >
+      ×
     </button>
+
+    <h2>
+      🛍️ سبد خرید
+    </h2>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-total">
+
+      مجموع:
+
+      <strong id="cart-total">
+        ۰ تومان
+      </strong>
+
+    </div>
+
+    <button
+      onclick="openCheckout()"
+      class="main-btn"
+    >
+      ادامه و ثبت سفارش
+    </button>
+
   </div>
-  <div id="orders-container">
-    <p>برای نمایش سفارش‌ها روی بروزرسانی بزن.</p>
-  </div>
+
 </div>
+
+
+<!-- =========================
+     ADMIN LOGIN
+========================= -->
+
+<div
+  id="admin-login-modal"
+  class="modal"
+>
+
+  <div class="modal-content">
+
+    <button
+      class="close-btn"
+      onclick="closeAdminLogin()"
+    >
+      ×
+    </button>
+
+    <h2>
+      🔐 ورود مدیریت
+    </h2>
+
+    <input
+      id="admin-email"
+      type="email"
+      placeholder="ایمیل مدیر"
+    >
+
+    <input
+      id="admin-password"
+      type="password"
+      placeholder="رمز عبور"
+    >
+
+    <button
+      onclick="adminLogin()"
+      class="main-btn"
+    >
+      ورود
+    </button>
+
+    <p id="admin-login-message"></p>
+
   </div>
+
 </div>
-<!-- CHECKOUT -->
-<div id="checkout-modal" class="modal">
+
+
+<!-- =========================
+     ADMIN PANEL
+========================= -->
+
+<div
+  id="admin-panel-modal"
+  class="modal"
+>
+
+  <div class="modal-content admin-content">
+
+    <button
+      class="close-btn"
+      onclick="closeAdminPanel()"
+    >
+      ×
+    </button>
+
+
+    <div class="admin-title">
+
+      <h2>
+        ⚙️ پنل مدیریت Luna Girl
+      </h2>
+
+      <button
+        onclick="adminLogout()"
+        class="logout-btn"
+      >
+        خروج
+      </button>
+
+    </div>
+
+
+    <!-- ADD PRODUCT -->
+
+    <div class="admin-section">
+
+      <h3>
+        ➕ افزودن محصول
+      </h3>
+
+      <input
+        id="product-name"
+        type="text"
+        placeholder="نام محصول"
+      >
+
+      <input
+        id="product-price"
+        type="number"
+        placeholder="قیمت به تومان"
+      >
+
+      <textarea
+        id="product-description"
+        placeholder="توضیحات محصول"
+      ></textarea>
+
+      <input
+        id="product-stock"
+        type="number"
+        placeholder="موجودی"
+      >
+
+      <input
+        id="product-image"
+        type="file"
+        accept="image/*"
+      >
+
+      <button
+        onclick="saveProduct()"
+        class="main-btn"
+      >
+        ذخیره محصول
+      </button>
+
+      <p id="product-message"></p>
+
+    </div>
+
+
+    <!-- ORDERS -->
+
+    <div
+      class="admin-section orders-section"
+    >
+
+      <div class="orders-header">
+
+        <div>
+
+          <h3>
+            📦 سفارش‌های مشتریان
+          </h3>
+
+          <p>
+            سفارش‌های ثبت‌شده را از اینجا ببین.
+          </p>
+
+        </div>
+
+        <button
+          onclick="loadOrders()"
+          class="refresh-btn"
+        >
+          🔄 بروزرسانی
+        </button>
+
+      </div>
+
+      <div id="orders-container">
+
+        <p>
+          برای نمایش سفارش‌ها روی بروزرسانی بزن.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     CHECKOUT
+========================= -->
+
+<div
+  id="checkout-modal"
+  class="modal"
+>
+
   <div class="modal-content checkout-content">
-<button class="close-btn" onclick="closeCheckout()">×</button>
-<h2>📦 ثبت سفارش</h2>
-<form onsubmit="submitOrder(event)">
-  <input
-    id="first-name"
-    type="text"
-    placeholder="نام"
-    required
-  >
-  <input
-    id="last-name"
-    type="text"
-    placeholder="نام خانوادگی"
-    required
-  >
-  <input
-    id="phone"
-    type="tel"
-    placeholder="شماره موبایل"
-    required
-  >
-  <input
-    id="province"
-    type="text"
-    placeholder="استان"
-    required
-  >
-  <input
-    id="city"
-    type="text"
-    placeholder="شهر"
-    required
-  >
-  <textarea
-    id="address"
-    placeholder="آدرس کامل"
-    required
-  ></textarea>
-  <input
-    id="postal-code"
-    type="text"
-    placeholder="کد پستی"
-    required
-  >
-  <button type="submit" class="main-btn">
-    ثبت سفارش
-  </button>
-  <p id="checkout-message"></p>
-</form>
+
+    <button
+      class="close-btn"
+      onclick="closeCheckout()"
+    >
+      ×
+    </button>
+
+    <h2>
+      📦 ثبت سفارش
+    </h2>
+
+    <form
+      id="checkout-form"
+      onsubmit="submitOrder(event)"
+    >
+
+      <input
+        id="first-name"
+        type="text"
+        placeholder="نام"
+        required
+      >
+
+      <input
+        id="last-name"
+        type="text"
+        placeholder="نام خانوادگی"
+        required
+      >
+
+      <input
+        id="phone"
+        type="tel"
+        placeholder="شماره موبایل"
+        required
+      >
+
+      <input
+        id="province"
+        type="text"
+        placeholder="استان"
+        required
+      >
+
+      <input
+        id="city"
+        type="text"
+        placeholder="شهر"
+        required
+      >
+
+      <textarea
+        id="address"
+        placeholder="آدرس کامل"
+        required
+      ></textarea>
+
+      <input
+        id="postal-code"
+        type="text"
+        placeholder="کد پستی"
+        required
+      >
+
+      <button
+        type="submit"
+        class="main-btn"
+      >
+        ثبت سفارش
+      </button>
+
+      <p id="checkout-message"></p>
+
+    </form>
+
   </div>
+
 </div>
+
+
+<!-- SCRIPT -->
+
 <script src="script.js"></script>
+
 </body>
 </html>

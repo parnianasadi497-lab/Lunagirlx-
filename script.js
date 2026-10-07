@@ -106,13 +106,15 @@ async function loadProducts() {
       const price = product.Price || 0;
 
       card.innerHTML = `
-        <img
-  class="product-image"
-  src="${escapeHtml(image)}"
-  alt="${escapeHtml(name)}"
-  style="width:100%;height:300px;object-fit:cover;display:block;"
->
-        >
+        card.innerHTML = `
+  <img
+    class="product-image"
+    src="${image}"
+    alt="${escapeHtml(name)}"
+    style="width:100%;height:300px;object-fit:cover;display:block;"
+  >
+
+  <div class="product-info">
 
         <div class="product-info">
 

@@ -107,10 +107,11 @@ async function loadProducts() {
 
       card.innerHTML = `
         <img
-          class="product-image"
-          src="${image}"
-          alt="${escapeHtml(name)}"
-          onerror="this.src='https://via.placeholder.com/600x600?text=Luna+Girl'"
+  class="product-image"
+  src="${escapeHtml(image)}"
+  alt="${escapeHtml(name)}"
+  style="width:100%;height:300px;object-fit:cover;display:block;"
+>
         >
 
         <div class="product-info">

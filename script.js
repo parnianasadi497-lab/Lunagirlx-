@@ -976,25 +976,17 @@ async function adminLogin() {
     }
 
 
-    if (
-      !data.user ||
-      data.user.id !== ADMIN_ID
-    ) {
+    if (!data.user) {
 
-      await supabaseClient
-        .auth
-        .signOut();
+  await supabaseClient.auth.signOut();
 
+  if (message) {
+    message.textContent =
+      "ورود انجام نشد. دوباره تلاش کن.";
+  }
 
-      if (message) {
-
-        message.textContent =
-          "این حساب اجازه ورود به پنل مدیریت را ندارد.";
-
-      }
-
-      return;
-    }
+  return;
+}
 
 
     closeAdminLogin();

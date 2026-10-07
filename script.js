@@ -95,7 +95,43 @@ async function loadProducts() {
 
       card.className = "product-card";
 
-      const image = String(product.image_url || "").trim();
+      const image = card.innerHTML = `
+  ${
+    image
+      ? `<img
+          class="product-image"
+          src="${image}"
+          alt="${escapeHtml(name)}"
+          style="width:100%;height:300px;object-fit:cover;display:block;border-radius:16px 16px 0 0;"
+        >`
+      : `<div style="height:300px;display:flex;align-items:center;justify-content:center;background:#f8f3f5;border-radius:16px 16px 0 0;">
+          عکس محصول موجود نیست ♡
+        </div>`
+  }
+
+  <div class="product-info">
+
+    <h3>
+      ${escapeHtml(name)}
+    </h3>
+
+    <p class="product-description">
+      ${escapeHtml(description)}
+    </p>
+
+    <div class="product-price">
+      ${formatPrice(price)}
+    </div>
+
+    <button
+      class="add-cart-btn"
+      onclick="addToCart(${Number(product.id)})"
+    >
+      افزودن به سبد 🛍️
+    </button>
+
+  </div>
+`;;
       const name = product.Name || "محصول";
       const description = product.Description || "";
       const price = product.Price || 0;

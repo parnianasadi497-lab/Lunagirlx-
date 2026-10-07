@@ -27,16 +27,12 @@ function formatPrice(price) {
 
 function showModal(id) {
   const element = document.getElementById(id);
-  if (element) {
-    element.classList.add("active");
-  }
+  if (element) element.classList.add("active");
 }
 
 function hideModal(id) {
   const element = document.getElementById(id);
-  if (element) {
-    element.classList.remove("active");
-  }
+  if (element) element.classList.remove("active");
 }
 
 function escapeHtml(value) {
@@ -100,21 +96,61 @@ async function loadProducts() {
       card.className = "product-card";
 
       const image = String(product.image_url || "").trim();
-
       const name = product.Name || "محصول";
       const description = product.Description || "";
       const price = product.Price || 0;
 
-      card.innerHTML = `
-        card.innerHTML = `
-  <img
-    class="product-image"
-    src="${image}"
-    alt="${escapeHtml(name)}"
-    style="width:100%;height:300px;object-fit:cover;display:block;"
-  >
+      let imageHTML = "";
 
-  <div class="product-info">
+      if (image) {
+        imageHTML = `
+          <img
+            class="product-image"
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(name)}"
+            style="
+              width:100%;
+              height:300px;
+              object-fit:cover;
+              display:block;
+            "
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+
+          <div
+            style="
+              width:100%;
+              height:300px;
+              display:none;
+              align-items:center;
+              justify-content:center;
+              background:#f8f3f5;
+              color:#999;
+            "
+          >
+            تصویر محصول
+          </div>
+        `;
+      } else {
+        imageHTML = `
+          <div
+            style="
+              width:100%;
+              height:300px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              background:#f8f3f5;
+              color:#999;
+            "
+          >
+            تصویر محصول
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        ${imageHTML}
 
         <div class="product-info">
 
@@ -256,13 +292,13 @@ function updateCart() {
   itemsElement.innerHTML = "";
 
   cart.forEach(item => {
+
     total +=
       Number(item.Price || 0) *
       item.quantity;
 
     const image =
-      item.image_url ||
-      "https://via.placeholder.com/150?text=Luna";
+      String(item.image_url || "").trim();
 
     const div =
       document.createElement("div");
@@ -270,10 +306,21 @@ function updateCart() {
     div.className = "cart-item";
 
     div.innerHTML = `
-      <img
-        src="${image}"
-        alt=""
-      >
+      ${
+        image
+          ? `
+            <img
+              src="${escapeHtml(image)}"
+              alt=""
+              style="
+                width:70px;
+                height:70px;
+                object-fit:cover;
+              "
+            >
+          `
+          : ""
+      }
 
       <div class="cart-item-info">
 
@@ -433,6 +480,7 @@ async function submitOrder(event) {
   };
 
   try {
+
     const { error } =
       await supabaseClient
         .from("orders")
@@ -466,6 +514,7 @@ async function submitOrder(event) {
     }
 
   } catch (error) {
+
     console.error(error);
 
     alert(
@@ -490,6 +539,7 @@ function closeAdminLogin() {
 
 
 async function adminLogin() {
+
   const email =
     document.getElementById("admin-email")?.value.trim();
 
@@ -500,6 +550,7 @@ async function adminLogin() {
     document.getElementById("admin-login-message");
 
   if (!email || !password) {
+
     if (message) {
       message.textContent =
         "ایمیل و رمز عبور را وارد کن.";
@@ -514,6 +565,7 @@ async function adminLogin() {
   }
 
   try {
+
     const { data, error } =
       await supabaseClient.auth.signInWithPassword({
         email: email,
@@ -521,6 +573,7 @@ async function adminLogin() {
       });
 
     if (error) {
+
       console.error("Login error:", error);
 
       if (message) {
@@ -535,6 +588,7 @@ async function adminLogin() {
       !data.user ||
       data.user.id !== ADMIN_ID
     ) {
+
       await supabaseClient.auth.signOut();
 
       if (message) {
@@ -550,6 +604,7 @@ async function adminLogin() {
     await openAdminPanel();
 
   } catch (error) {
+
     console.error(error);
 
     if (message) {
@@ -565,6 +620,7 @@ async function adminLogin() {
 ========================================= */
 
 async function openAdminPanel() {
+
   const {
     data: {
       session
@@ -576,7 +632,9 @@ async function openAdminPanel() {
     !session.user ||
     session.user.id !== ADMIN_ID
   ) {
+
     openAdminLogin();
+
     return;
   }
 
@@ -596,6 +654,7 @@ function closeAdminPanel() {
 ========================================= */
 
 async function saveProduct() {
+
   const name =
     document.getElementById("product-name")?.value.trim();
 
@@ -612,7 +671,9 @@ async function saveProduct() {
     document.getElementById("product-image");
 
   if (!name || !price || !description || !stock) {
+
     alert("لطفاً اطلاعات محصول را کامل وارد کن.");
+
     return;
   }
 
@@ -620,12 +681,15 @@ async function saveProduct() {
     document.querySelector(".admin-save-btn");
 
   if (saveButton) {
+
     saveButton.disabled = true;
+
     saveButton.textContent =
       "در حال ذخیره...";
   }
 
   try {
+
     const {
       data: {
         session
@@ -637,21 +701,20 @@ async function saveProduct() {
       !session.user ||
       session.user.id !== ADMIN_ID
     ) {
+
       alert("ابتدا وارد پنل مدیریت شو.");
+
       return;
     }
 
     let imageUrl = "";
-
-    /* -------------------------
-       UPLOAD IMAGE
-    ------------------------- */
 
     if (
       imageInput &&
       imageInput.files &&
       imageInput.files.length > 0
     ) {
+
       const file =
         imageInput.files[0];
 
@@ -684,6 +747,7 @@ async function saveProduct() {
         );
 
       if (uploadError) {
+
         console.error(
           "Upload error:",
           uploadError
@@ -706,10 +770,6 @@ async function saveProduct() {
         publicData.publicUrl;
     }
 
-    /* -------------------------
-       INSERT PRODUCT
-    ------------------------- */
-
     const {
       error
     } = await supabaseClient
@@ -725,6 +785,7 @@ async function saveProduct() {
       ]);
 
     if (error) {
+
       console.error(
         "Product insert error:",
         error
@@ -741,22 +802,10 @@ async function saveProduct() {
       "محصول با موفقیت اضافه شد 🎀"
     );
 
-    const nameInput =
-      document.getElementById("product-name");
-
-    const priceInput =
-      document.getElementById("product-price");
-
-    const descriptionInput =
-      document.getElementById("product-description");
-
-    const stockInput =
-      document.getElementById("product-stock");
-
-    if (nameInput) nameInput.value = "";
-    if (priceInput) priceInput.value = "";
-    if (descriptionInput) descriptionInput.value = "";
-    if (stockInput) stockInput.value = "";
+    document.getElementById("product-name").value = "";
+    document.getElementById("product-price").value = "";
+    document.getElementById("product-description").value = "";
+    document.getElementById("product-stock").value = "";
 
     if (imageInput) {
       imageInput.value = "";
@@ -765,6 +814,7 @@ async function saveProduct() {
     await loadProducts();
 
   } catch (error) {
+
     console.error(error);
 
     alert(
@@ -772,8 +822,11 @@ async function saveProduct() {
     );
 
   } finally {
+
     if (saveButton) {
+
       saveButton.disabled = false;
+
       saveButton.textContent =
         "ذخیره محصول";
     }
@@ -786,16 +839,17 @@ async function saveProduct() {
 ========================================= */
 
 async function loadOrders() {
+
   const container =
     document.getElementById("orders-container");
 
   if (!container) return;
 
-  container.innerHTML = `
-    <p>در حال دریافت سفارش‌ها...</p>
-  `;
+  container.innerHTML =
+    "<p>در حال دریافت سفارش‌ها...</p>";
 
   try {
+
     const {
       data: {
         session
@@ -807,9 +861,9 @@ async function loadOrders() {
       !session.user ||
       session.user.id !== ADMIN_ID
     ) {
-      container.innerHTML = `
-        <p>برای دیدن سفارش‌ها باید وارد مدیر شوید.</p>
-      `;
+
+      container.innerHTML =
+        "<p>برای دیدن سفارش‌ها باید وارد مدیر شوید.</p>";
 
       return;
     }
@@ -825,26 +879,22 @@ async function loadOrders() {
       });
 
     if (error) {
+
       console.error(
         "Orders error:",
         error
       );
 
-      container.innerHTML = `
-        <p>
-          دریافت سفارش‌ها با مشکل مواجه شد.
-        </p>
-      `;
+      container.innerHTML =
+        "<p>دریافت سفارش‌ها با مشکل مواجه شد.</p>";
 
       return;
     }
 
     if (!data || data.length === 0) {
-      container.innerHTML = `
-        <p>
-          هنوز سفارشی ثبت نشده ♡
-        </p>
-      `;
+
+      container.innerHTML =
+        "<p>هنوز سفارشی ثبت نشده ♡</p>";
 
       return;
     }
@@ -852,6 +902,7 @@ async function loadOrders() {
     container.innerHTML = "";
 
     data.forEach(order => {
+
       const card =
         document.createElement("div");
 
@@ -861,6 +912,7 @@ async function loadOrders() {
       let itemsHtml = "";
 
       if (Array.isArray(order.items)) {
+
         itemsHtml =
           order.items
             .map(item => `
@@ -877,9 +929,7 @@ async function loadOrders() {
         order.created_at
           ? new Date(
               order.created_at
-            ).toLocaleString(
-              "fa-IR"
-            )
+            ).toLocaleString("fa-IR")
           : "";
 
       card.innerHTML = `
@@ -950,6 +1000,7 @@ async function loadOrders() {
                 border:1px solid #eadde1;
               "
             >
+
               <option value="در انتظار بررسی"
                 ${order.status === "در انتظار بررسی" ? "selected" : ""}>
                 در انتظار بررسی
@@ -998,13 +1049,11 @@ async function loadOrders() {
     });
 
   } catch (error) {
+
     console.error(error);
 
-    container.innerHTML = `
-      <p>
-        خطایی هنگام دریافت سفارش‌ها رخ داد.
-      </p>
-    `;
+    container.innerHTML =
+      "<p>خطایی هنگام دریافت سفارش‌ها رخ داد.</p>";
   }
 }
 
@@ -1014,6 +1063,7 @@ async function loadOrders() {
 ========================================= */
 
 async function updateOrderStatus(orderId) {
+
   const select =
     document.getElementById(
       `status-${orderId}`
@@ -1025,6 +1075,7 @@ async function updateOrderStatus(orderId) {
     select.value;
 
   try {
+
     const {
       data: {
         session
@@ -1036,6 +1087,7 @@ async function updateOrderStatus(orderId) {
       !session.user ||
       session.user.id !== ADMIN_ID
     ) {
+
       alert(
         "دسترسی مدیر لازم است."
       );
@@ -1053,6 +1105,7 @@ async function updateOrderStatus(orderId) {
       .eq("id", orderId);
 
     if (error) {
+
       console.error(error);
 
       alert(
@@ -1069,6 +1122,7 @@ async function updateOrderStatus(orderId) {
     await loadOrders();
 
   } catch (error) {
+
     console.error(error);
 
     alert(
@@ -1083,6 +1137,7 @@ async function updateOrderStatus(orderId) {
 ========================================= */
 
 async function adminLogout() {
+
   await supabaseClient.auth.signOut();
 
   closeAdminPanel();
@@ -1094,7 +1149,7 @@ async function adminLogout() {
 
 
 /* =========================================
-   CLOSE MODALS BY CLICKING OUTSIDE
+   CLOSE MODALS
 ========================================= */
 
 document.addEventListener(
@@ -1106,9 +1161,8 @@ document.addEventListener(
 
     modals.forEach(modal => {
 
-      if (
-        event.target === modal
-      ) {
+      if (event.target === modal) {
+
         modal.classList.remove(
           "active"
         );
@@ -1120,7 +1174,7 @@ document.addEventListener(
 
 
 /* =========================================
-   CHECKOUT FORM
+   START
 ========================================= */
 
 document.addEventListener(
@@ -1133,6 +1187,7 @@ document.addEventListener(
       );
 
     if (checkoutForm) {
+
       checkoutForm.addEventListener(
         "submit",
         submitOrder

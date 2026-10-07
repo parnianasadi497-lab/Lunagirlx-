@@ -9,7 +9,7 @@ const SUPABASE_KEY =
   "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
 
 const ADMIN_ID =
-  "ac82e56f-d171-402e-a0f6-8664ec1be7ba";
+  "ac82e56f-d171-402a-e0f6-8664ec1be7ba";
 
 
 /* =========================================
@@ -64,6 +64,45 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================
+   IMAGE URL
+========================================= */
+
+function getImageUrl(url) {
+
+  const raw =
+    String(url || "").trim();
+
+  if (!raw) {
+    return "";
+  }
+
+  /*
+    اگر URL از نوع Signed URL باشد،
+    آن را به Public URL تبدیل می‌کنیم.
+  */
+
+  const signedMarker =
+    "/storage/v1/object/sign/products/";
+
+  if (raw.includes(signedMarker)) {
+
+    const objectPath =
+      raw
+        .split(signedMarker)[1]
+        .split("?")[0];
+
+    return (
+      SUPABASE_URL +
+      "/storage/v1/object/public/products/" +
+      objectPath
+    );
+  }
+
+  return raw;
 }
 
 
@@ -141,10 +180,8 @@ async function loadProducts() {
         "product-card";
 
 
-      const image =
-        String(
-          product.image_url || ""
-        ).trim();
+      const imageUrl =
+        getImageUrl(product.image_url);
 
 
       const name =
@@ -163,74 +200,134 @@ async function loadProducts() {
 
 
       /* =================================
-         PRODUCT CARD
+         IMAGE
       ================================= */
 
-      card.innerHTML = `
+      if (imageUrl) {
 
-        ${
-          image
-            ? `
-              <img
-                class="product-image"
-                src="${escapeHtml(image)}"
-                alt="${escapeHtml(name)}"
-                style="
-                  width:100%;
-                  height:300px;
-                  object-fit:cover;
-                  display:block;
-                  border-radius:16px 16px 0 0;
-                "
-              >
-            `
-            : `
-              <div
-                style="
-                  width:100%;
-                  height:300px;
-                  display:flex;
-                  align-items:center;
-                  justify-content:center;
-                  background:#f8f3f5;
-                  border-radius:16px 16px 0 0;
-                  color:#9b7b85;
-                "
-              >
-                عکس محصول موجود نیست ♡
-              </div>
-            `
-        }
+        const imageBox =
+          document.createElement("div");
+
+        imageBox.style.width = "100%";
+        imageBox.style.height = "300px";
+        imageBox.style.overflow = "hidden";
+        imageBox.style.background = "#f8f3f5";
+        imageBox.style.borderRadius =
+          "16px 16px 0 0";
 
 
-        <div class="product-info">
+        const img =
+          document.createElement("img");
 
-          <h3>
-            ${escapeHtml(name)}
-          </h3>
+        img.className =
+          "product-image";
+
+        img.src = imageUrl;
+
+        img.alt = name;
+
+        img.loading = "eager";
+
+        img.style.width = "100%";
+        img.style.height = "300px";
+        img.style.objectFit = "cover";
+        img.style.display = "block";
+        img.style.visibility = "visible";
+        img.style.opacity = "1";
+        img.style.borderRadius =
+          "16px 16px 0 0";
 
 
-          <p class="product-description">
-            ${escapeHtml(description)}
-          </p>
+        img.onerror = function() {
+
+          console.error(
+            "IMAGE FAILED:",
+            imageUrl
+          );
+
+          imageBox.innerHTML = `
+            <div
+              style="
+                width:100%;
+                height:300px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                background:#f8f3f5;
+                color:#9b7b85;
+                text-align:center;
+              "
+            >
+              تصویر محصول بارگذاری نشد ♡
+            </div>
+          `;
+
+        };
 
 
-          <div class="product-price">
-            ${formatPrice(price)}
-          </div>
+        imageBox.appendChild(img);
+
+        card.appendChild(imageBox);
+
+      } else {
+
+        const noImage =
+          document.createElement("div");
+
+        noImage.style.width = "100%";
+        noImage.style.height = "300px";
+        noImage.style.display = "flex";
+        noImage.style.alignItems = "center";
+        noImage.style.justifyContent = "center";
+        noImage.style.background = "#f8f3f5";
+        noImage.style.borderRadius =
+          "16px 16px 0 0";
+        noImage.style.color = "#9b7b85";
+
+        noImage.textContent =
+          "عکس محصول موجود نیست ♡";
+
+        card.appendChild(noImage);
+
+      }
 
 
-          <button
-            class="add-cart-btn"
-            onclick="addToCart(${Number(product.id)})"
-          >
-            افزودن به سبد 🛍️
-          </button>
+      /* =================================
+         PRODUCT INFO
+      ================================= */
 
+      const productInfo =
+        document.createElement("div");
+
+      productInfo.className =
+        "product-info";
+
+
+      productInfo.innerHTML = `
+
+        <h3>
+          ${escapeHtml(name)}
+        </h3>
+
+        <p class="product-description">
+          ${escapeHtml(description)}
+        </p>
+
+        <div class="product-price">
+          ${formatPrice(price)}
         </div>
+
+        <button
+          class="add-cart-btn"
+          onclick="addToCart(${Number(product.id)})"
+        >
+          افزودن به سبد 🛍️
+        </button>
 
       `;
 
+
+      card.appendChild(productInfo);
 
       container.appendChild(card);
 
@@ -439,7 +536,7 @@ function updateCart() {
 
 
     const image =
-      item.image_url || "";
+      getImageUrl(item.image_url);
 
 
     div.innerHTML = `
@@ -1114,6 +1211,11 @@ async function saveProduct() {
       }
 
 
+      /*
+        همیشه Public URL ذخیره می‌کنیم،
+        نه Signed URL.
+      */
+
       const {
         data: publicData
       } =
@@ -1126,7 +1228,7 @@ async function saveProduct() {
 
 
       imageUrl =
-        publicData.publicUrl;
+        publicData?.publicUrl || "";
 
     }
 

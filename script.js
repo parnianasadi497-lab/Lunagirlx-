@@ -99,9 +99,7 @@ async function loadProducts() {
 
       card.className = "product-card";
 
-      const image =
-        product.image_url ||
-        "https://via.placeholder.com/600x600?text=Luna+Girl";
+      const image = String(product.image_url || "").trim();
 
       const name = product.Name || "محصول";
       const description = product.Description || "";

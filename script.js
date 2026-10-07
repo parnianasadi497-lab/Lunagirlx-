@@ -2,16 +2,28 @@
    LUNA GIRL - COMPLETE SCRIPT
 ========================================= */
 
-const SUPABASE_URL = "https://qdyudmrauanjbvwcacct.supabase.co";
+const SUPABASE_URL =
+  "https://qdyudmrauanjbvwcacct.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
+const SUPABASE_KEY =
+  "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
+const ADMIN_ID =
+  "ac82e56f-d171-402e-a0f6-8664ec1be7ba";
 
-const ADMIN_ID = "ac82e56f-d171-402e-a0f6-8664ec1be7ba";
+
+/* =========================================
+   SUPABASE
+========================================= */
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+
+/* =========================================
+   VARIABLES
+========================================= */
 
 let products = [];
 let cart = [];
@@ -25,15 +37,24 @@ function formatPrice(price) {
   return Number(price || 0).toLocaleString("fa-IR") + " تومان";
 }
 
+
 function showModal(id) {
   const element = document.getElementById(id);
-  if (element) element.classList.add("active");
+
+  if (element) {
+    element.classList.add("active");
+  }
 }
+
 
 function hideModal(id) {
   const element = document.getElementById(id);
-  if (element) element.classList.remove("active");
+
+  if (element) {
+    element.classList.remove("active");
+  }
 }
+
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -50,22 +71,37 @@ function escapeHtml(value) {
 ========================================= */
 
 async function loadProducts() {
-  const container = document.getElementById("products-container");
+
+  const container =
+    document.getElementById("products-container");
 
   if (!container) return;
 
   container.innerHTML = `
-    <p class="loading">در حال بارگذاری محصولات... ♡</p>
+    <p class="loading">
+      در حال بارگذاری محصولات... ♡
+    </p>
   `;
 
   try {
-    const { data, error } = await supabaseClient
+
+    const {
+      data,
+      error
+    } = await supabaseClient
       .from("products")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", {
+        ascending: false
+      });
+
 
     if (error) {
-      console.error("Products error:", error);
+
+      console.error(
+        "PRODUCTS ERROR:",
+        error
+      );
 
       container.innerHTML = `
         <p class="loading">
@@ -76,9 +112,12 @@ async function loadProducts() {
       return;
     }
 
+
     products = data || [];
 
+
     if (products.length === 0) {
+
       container.innerHTML = `
         <p class="empty">
           هنوز محصولی اضافه نشده ♡
@@ -88,105 +127,84 @@ async function loadProducts() {
       return;
     }
 
+
     container.innerHTML = "";
 
-    products.forEach((product) => {
-      const card = document.createElement("div");
 
-      card.className = "product-card";
+    products.forEach(product => {
 
-      const image = card.innerHTML = `
-  ${
-    image
-      ? `<img
-          class="product-image"
-          src="${image}"
-          alt="${escapeHtml(name)}"
-          style="width:100%;height:300px;object-fit:cover;display:block;border-radius:16px 16px 0 0;"
-        >`
-      : `<div style="height:300px;display:flex;align-items:center;justify-content:center;background:#f8f3f5;border-radius:16px 16px 0 0;">
-          عکس محصول موجود نیست ♡
-        </div>`
-  }
+      const card =
+        document.createElement("div");
 
-  <div class="product-info">
+      card.className =
+        "product-card";
 
-    <h3>
-      ${escapeHtml(name)}
-    </h3>
 
-    <p class="product-description">
-      ${escapeHtml(description)}
-    </p>
+      const image =
+        String(
+          product.image_url || ""
+        ).trim();
 
-    <div class="product-price">
-      ${formatPrice(price)}
-    </div>
 
-    <button
-      class="add-cart-btn"
-      onclick="addToCart(${Number(product.id)})"
-    >
-      افزودن به سبد 🛍️
-    </button>
+      const name =
+        product.Name ||
+        "محصول";
 
-  </div>
-`;;
-      const name = product.Name || "محصول";
-      const description = product.Description || "";
-      const price = product.Price || 0;
 
-      let imageHTML = "";
+      const description =
+        product.Description ||
+        "";
 
-      if (image) {
-        imageHTML = `
-          <img
-            class="product-image"
-            src="${escapeHtml(image)}"
-            alt="${escapeHtml(name)}"
-            style="
-              width:100%;
-              height:300px;
-              object-fit:cover;
-              display:block;
-            "
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-          >
 
-          <div
-            style="
-              width:100%;
-              height:300px;
-              display:none;
-              align-items:center;
-              justify-content:center;
-              background:#f8f3f5;
-              color:#999;
-            "
-          >
-            تصویر محصول
-          </div>
-        `;
-      } else {
-        imageHTML = `
-          <div
-            style="
-              width:100%;
-              height:300px;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              background:#f8f3f5;
-              color:#999;
-            "
-          >
-            تصویر محصول
-          </div>
-        `;
-      }
+      const price =
+        product.Price ||
+        0;
+
+
+      /* =================================
+         PRODUCT CARD
+      ================================= */
 
       card.innerHTML = `
-        ${imageHTML}
+
+        ${
+          image
+            ? `
+              <img
+                class="product-image"
+                src="${image}"
+                alt="${escapeHtml(name)}"
+                style="
+                  width:100%;
+                  height:300px;
+                  object-fit:cover;
+                  display:block;
+                  border-radius:16px 16px 0 0;
+                "
+                onerror="
+                  this.onerror=null;
+                  this.src='https://placehold.co/600x600/f8f3f5/9b7b85?text=Luna+Girl';
+                "
+              >
+            `
+            : `
+              <div
+                style="
+                  width:100%;
+                  height:300px;
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  background:#f8f3f5;
+                  border-radius:16px 16px 0 0;
+                  color:#9b7b85;
+                "
+              >
+                عکس محصول موجود نیست ♡
+              </div>
+            `
+        }
+
 
         <div class="product-info">
 
@@ -194,13 +212,16 @@ async function loadProducts() {
             ${escapeHtml(name)}
           </h3>
 
+
           <p class="product-description">
             ${escapeHtml(description)}
           </p>
 
+
           <div class="product-price">
             ${formatPrice(price)}
           </div>
+
 
           <button
             class="add-cart-btn"
@@ -210,20 +231,30 @@ async function loadProducts() {
           </button>
 
         </div>
+
       `;
 
+
       container.appendChild(card);
+
     });
 
+
   } catch (error) {
-    console.error("Load products error:", error);
+
+    console.error(
+      "LOAD PRODUCTS ERROR:",
+      error
+    );
 
     container.innerHTML = `
       <p class="loading">
         خطایی در اتصال به فروشگاه رخ داد.
       </p>
     `;
+
   }
+
 }
 
 
@@ -232,100 +263,168 @@ async function loadProducts() {
 ========================================= */
 
 function addToCart(productId) {
-  const product = products.find(
-    item => Number(item.id) === Number(productId)
-  );
+
+  const product =
+    products.find(
+      item =>
+        Number(item.id) ===
+        Number(productId)
+    );
+
 
   if (!product) {
-    alert("محصول پیدا نشد.");
+
+    alert(
+      "محصول پیدا نشد."
+    );
+
     return;
   }
 
-  const existing = cart.find(
-    item => Number(item.id) === Number(productId)
-  );
+
+  const existing =
+    cart.find(
+      item =>
+        Number(item.id) ===
+        Number(productId)
+    );
+
 
   if (existing) {
+
     existing.quantity += 1;
+
   } else {
+
     cart.push({
       ...product,
       quantity: 1
     });
+
   }
+
 
   updateCart();
 
-  alert("محصول به سبد خرید اضافه شد 🛍️");
+
+  alert(
+    "محصول به سبد خرید اضافه شد 🛍️"
+  );
+
 }
 
 
 function removeFromCart(productId) {
-  cart = cart.filter(
-    item => Number(item.id) !== Number(productId)
-  );
+
+  cart =
+    cart.filter(
+      item =>
+        Number(item.id) !==
+        Number(productId)
+    );
 
   updateCart();
+
 }
 
 
-function changeCartQuantity(productId, amount) {
-  const item = cart.find(
-    product => Number(product.id) === Number(productId)
-  );
+function changeCartQuantity(
+  productId,
+  amount
+) {
+
+  const item =
+    cart.find(
+      product =>
+        Number(product.id) ===
+        Number(productId)
+    );
+
 
   if (!item) return;
 
+
   item.quantity += amount;
 
+
   if (item.quantity <= 0) {
+
     removeFromCart(productId);
+
     return;
   }
 
+
   updateCart();
+
 }
 
 
 function updateCart() {
+
   const countElement =
-    document.getElementById("cart-count");
+    document.getElementById(
+      "cart-count"
+    );
+
 
   const itemsElement =
-    document.getElementById("cart-items");
+    document.getElementById(
+      "cart-items"
+    );
+
 
   const totalElement =
-    document.getElementById("cart-total");
+    document.getElementById(
+      "cart-total"
+    );
 
-  const count = cart.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+
+  const count =
+    cart.reduce(
+      (sum, item) =>
+        sum + item.quantity,
+      0
+    );
+
 
   if (countElement) {
+
     countElement.textContent =
       count.toLocaleString("fa-IR");
+
   }
 
-  if (!itemsElement || !totalElement) {
+
+  if (
+    !itemsElement ||
+    !totalElement
+  ) {
+
     return;
   }
 
+
   if (cart.length === 0) {
+
     itemsElement.innerHTML = `
       <p class="empty">
         سبد خرید خالیه ♡
       </p>
     `;
 
-    totalElement.textContent = "۰ تومان";
+    totalElement.textContent =
+      "۰ تومان";
 
     return;
   }
 
+
   let total = 0;
 
+
   itemsElement.innerHTML = "";
+
 
   cart.forEach(item => {
 
@@ -333,30 +432,38 @@ function updateCart() {
       Number(item.Price || 0) *
       item.quantity;
 
-    const image =
-      String(item.image_url || "").trim();
 
     const div =
       document.createElement("div");
 
-    div.className = "cart-item";
+
+    div.className =
+      "cart-item";
+
+
+    const image =
+      item.image_url || "";
+
 
     div.innerHTML = `
+
       ${
         image
           ? `
             <img
-              src="${escapeHtml(image)}"
+              src="${image}"
               alt=""
               style="
                 width:70px;
                 height:70px;
                 object-fit:cover;
+                border-radius:12px;
               "
             >
           `
           : ""
       }
+
 
       <div class="cart-item-info">
 
@@ -364,31 +471,47 @@ function updateCart() {
           ${escapeHtml(item.Name)}
         </strong>
 
+
         <div>
           ${item.quantity.toLocaleString("fa-IR")}
           ×
           ${formatPrice(item.Price)}
         </div>
 
-        <div style="
-          display:flex;
-          gap:6px;
-          align-items:center;
-          margin-top:8px;
-        ">
+
+        <div
+          style="
+            display:flex;
+            gap:6px;
+            align-items:center;
+            margin-top:8px;
+          "
+        >
 
           <button
-            onclick="changeCartQuantity(${Number(item.id)}, -1)"
+            onclick="
+              changeCartQuantity(
+                ${Number(item.id)},
+                -1
+              )
+            "
           >
             −
           </button>
+
 
           <span>
             ${item.quantity.toLocaleString("fa-IR")}
           </span>
 
+
           <button
-            onclick="changeCartQuantity(${Number(item.id)}, 1)"
+            onclick="
+              changeCartQuantity(
+                ${Number(item.id)},
+                1
+              )
+            "
           >
             +
           </button>
@@ -397,30 +520,49 @@ function updateCart() {
 
       </div>
 
+
       <button
         class="cart-item-remove"
-        onclick="removeFromCart(${Number(item.id)})"
+        onclick="
+          removeFromCart(
+            ${Number(item.id)}
+          )
+        "
       >
         حذف
       </button>
+
     `;
 
+
     itemsElement.appendChild(div);
+
   });
+
 
   totalElement.textContent =
     formatPrice(total);
+
 }
 
 
 function openCart() {
+
   updateCart();
-  showModal("cart-modal");
+
+  showModal(
+    "cart-modal"
+  );
+
 }
 
 
 function closeCart() {
-  hideModal("cart-modal");
+
+  hideModal(
+    "cart-modal"
+  );
+
 }
 
 
@@ -429,49 +571,98 @@ function closeCart() {
 ========================================= */
 
 function openCheckout() {
+
   if (cart.length === 0) {
-    alert("سبد خریدت خالیه ♡");
+
+    alert(
+      "سبد خریدت خالیه ♡"
+    );
+
     return;
   }
 
+
   closeCart();
-  showModal("checkout-modal");
+
+  showModal(
+    "checkout-modal"
+  );
+
 }
 
 
 function closeCheckout() {
-  hideModal("checkout-modal");
+
+  hideModal(
+    "checkout-modal"
+  );
+
 }
 
 
 async function submitOrder(event) {
+
   event.preventDefault();
 
+
   if (cart.length === 0) {
-    alert("سبد خرید خالیه.");
+
+    alert(
+      "سبد خرید خالیه."
+    );
+
     return;
   }
 
+
   const firstName =
-    document.getElementById("first-name")?.value.trim();
+    document
+      .getElementById("first-name")
+      ?.value
+      .trim();
+
 
   const lastName =
-    document.getElementById("last-name")?.value.trim();
+    document
+      .getElementById("last-name")
+      ?.value
+      .trim();
+
 
   const phone =
-    document.getElementById("phone")?.value.trim();
+    document
+      .getElementById("phone")
+      ?.value
+      .trim();
+
 
   const province =
-    document.getElementById("province")?.value.trim();
+    document
+      .getElementById("province")
+      ?.value
+      .trim();
+
 
   const city =
-    document.getElementById("city")?.value.trim();
+    document
+      .getElementById("city")
+      ?.value
+      .trim();
+
 
   const address =
-    document.getElementById("address")?.value.trim();
+    document
+      .getElementById("address")
+      ?.value
+      .trim();
+
 
   const postalCode =
-    document.getElementById("postal-code")?.value.trim();
+    document
+      .getElementById("postal-code")
+      ?.value
+      .trim();
+
 
   if (
     !firstName ||
@@ -482,27 +673,38 @@ async function submitOrder(event) {
     !address ||
     !postalCode
   ) {
-    alert("لطفاً همه اطلاعات را کامل وارد کن.");
+
+    alert(
+      "لطفاً همه اطلاعات را کامل وارد کن."
+    );
+
     return;
   }
 
-  const total = cart.reduce(
-    (sum, item) =>
-      sum +
-      Number(item.Price || 0) *
-      item.quantity,
-    0
-  );
 
-  const items = cart.map(item => ({
-    id: item.id,
-    name: item.Name,
-    price: Number(item.Price || 0),
-    quantity: item.quantity,
-    image_url: item.image_url || ""
-  }));
+  const total =
+    cart.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.Price || 0) *
+        item.quantity,
+      0
+    );
+
+
+  const items =
+    cart.map(item => ({
+      id: item.id,
+      name: item.Name,
+      price: Number(item.Price || 0),
+      quantity: item.quantity,
+      image_url:
+        item.image_url || ""
+    }));
+
 
   const order = {
+
     first_name: firstName,
     last_name: lastName,
     phone: phone,
@@ -513,41 +715,61 @@ async function submitOrder(event) {
     items: items,
     total: total,
     status: "در انتظار بررسی"
+
   };
+
 
   try {
 
-    const { error } =
+    const {
+      error
+    } =
       await supabaseClient
         .from("orders")
         .insert([order]);
 
+
     if (error) {
-      console.error("Order error:", error);
+
+      console.error(
+        "ORDER ERROR:",
+        error
+      );
 
       alert(
-        "ثبت سفارش با مشکل مواجه شد. دوباره امتحان کن."
+        "ثبت سفارش با مشکل مواجه شد."
       );
 
       return;
     }
 
+
     alert(
       "سفارشت با موفقیت ثبت شد 💗"
     );
 
+
     cart = [];
+
 
     updateCart();
 
+
     closeCheckout();
 
+
     const form =
-      document.getElementById("checkout-form");
+      document.getElementById(
+        "checkout-form"
+      );
+
 
     if (form) {
+
       form.reset();
+
     }
+
 
   } catch (error) {
 
@@ -556,7 +778,9 @@ async function submitOrder(event) {
     alert(
       "خطایی هنگام ثبت سفارش رخ داد."
     );
+
   }
+
 }
 
 
@@ -565,89 +789,140 @@ async function submitOrder(event) {
 ========================================= */
 
 function openAdminLogin() {
-  showModal("admin-login-modal");
+
+  showModal(
+    "admin-login-modal"
+  );
+
 }
 
 
 function closeAdminLogin() {
-  hideModal("admin-login-modal");
+
+  hideModal(
+    "admin-login-modal"
+  );
+
 }
 
 
 async function adminLogin() {
 
   const email =
-    document.getElementById("admin-email")?.value.trim();
+    document
+      .getElementById("admin-email")
+      ?.value
+      .trim();
+
 
   const password =
-    document.getElementById("admin-password")?.value;
+    document
+      .getElementById("admin-password")
+      ?.value;
+
 
   const message =
-    document.getElementById("admin-login-message");
+    document.getElementById(
+      "admin-login-message"
+    );
+
 
   if (!email || !password) {
 
     if (message) {
+
       message.textContent =
         "ایمیل و رمز عبور را وارد کن.";
+
     }
 
     return;
   }
 
+
   if (message) {
+
     message.textContent =
       "در حال ورود...";
+
   }
+
 
   try {
 
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
+
+          email: email,
+          password: password
+
+        });
+
 
     if (error) {
 
-      console.error("Login error:", error);
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
 
       if (message) {
+
         message.textContent =
           "ایمیل یا رمز عبور اشتباه است.";
+
       }
 
       return;
     }
+
 
     if (
       !data.user ||
       data.user.id !== ADMIN_ID
     ) {
 
-      await supabaseClient.auth.signOut();
+      await supabaseClient
+        .auth
+        .signOut();
+
 
       if (message) {
+
         message.textContent =
           "این حساب اجازه ورود به پنل مدیریت را ندارد.";
+
       }
 
       return;
     }
 
+
     closeAdminLogin();
 
+
     await openAdminPanel();
+
 
   } catch (error) {
 
     console.error(error);
 
+
     if (message) {
+
       message.textContent =
         "خطایی در ورود رخ داد.";
+
     }
+
   }
+
 }
 
 
@@ -661,7 +936,11 @@ async function openAdminPanel() {
     data: {
       session
     }
-  } = await supabaseClient.auth.getSession();
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
 
   if (
     !session ||
@@ -674,14 +953,23 @@ async function openAdminPanel() {
     return;
   }
 
-  showModal("admin-panel-modal");
+
+  showModal(
+    "admin-panel-modal"
+  );
+
 
   await loadOrders();
+
 }
 
 
 function closeAdminPanel() {
-  hideModal("admin-panel-modal");
+
+  hideModal(
+    "admin-panel-modal"
+  );
+
 }
 
 
@@ -692,37 +980,51 @@ function closeAdminPanel() {
 async function saveProduct() {
 
   const name =
-    document.getElementById("product-name")?.value.trim();
+    document
+      .getElementById("product-name")
+      ?.value
+      .trim();
+
 
   const price =
-    document.getElementById("product-price")?.value;
+    document
+      .getElementById("product-price")
+      ?.value;
+
 
   const description =
-    document.getElementById("product-description")?.value.trim();
+    document
+      .getElementById("product-description")
+      ?.value
+      .trim();
+
 
   const stock =
-    document.getElementById("product-stock")?.value;
+    document
+      .getElementById("product-stock")
+      ?.value;
+
 
   const imageInput =
-    document.getElementById("product-image");
+    document.getElementById(
+      "product-image"
+    );
 
-  if (!name || !price || !description || !stock) {
 
-    alert("لطفاً اطلاعات محصول را کامل وارد کن.");
+  if (
+    !name ||
+    !price ||
+    !description ||
+    !stock
+  ) {
+
+    alert(
+      "لطفاً اطلاعات محصول را کامل وارد کن."
+    );
 
     return;
   }
 
-  const saveButton =
-    document.querySelector(".admin-save-btn");
-
-  if (saveButton) {
-
-    saveButton.disabled = true;
-
-    saveButton.textContent =
-      "در حال ذخیره...";
-  }
 
   try {
 
@@ -730,7 +1032,11 @@ async function saveProduct() {
       data: {
         session
       }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
 
     if (
       !session ||
@@ -738,12 +1044,16 @@ async function saveProduct() {
       session.user.id !== ADMIN_ID
     ) {
 
-      alert("ابتدا وارد پنل مدیریت شو.");
+      alert(
+        "ابتدا وارد پنل مدیریت شو."
+      );
 
       return;
     }
 
+
     let imageUrl = "";
+
 
     if (
       imageInput &&
@@ -754,8 +1064,12 @@ async function saveProduct() {
       const file =
         imageInput.files[0];
 
-      const fileExtension =
-        file.name.split(".").pop();
+
+      const extension =
+        file.name
+          .split(".")
+          .pop();
+
 
       const fileName =
         Date.now() +
@@ -764,28 +1078,34 @@ async function saveProduct() {
           .toString(36)
           .substring(2) +
         "." +
-        fileExtension;
+        extension;
+
 
       const filePath =
-        "products/" + fileName;
+        "products/" +
+        fileName;
+
 
       const {
         error: uploadError
-      } = await supabaseClient.storage
-        .from("products")
-        .upload(
-          filePath,
-          file,
-          {
-            cacheControl: "3600",
-            upsert: false
-          }
-        );
+      } =
+        await supabaseClient
+          .storage
+          .from("products")
+          .upload(
+            filePath,
+            file,
+            {
+              cacheControl: "3600",
+              upsert: false
+            }
+          );
+
 
       if (uploadError) {
 
         console.error(
-          "Upload error:",
+          "UPLOAD ERROR:",
           uploadError
         );
 
@@ -796,34 +1116,52 @@ async function saveProduct() {
         return;
       }
 
+
       const {
         data: publicData
-      } = supabaseClient.storage
-        .from("products")
-        .getPublicUrl(filePath);
+      } =
+        supabaseClient
+          .storage
+          .from("products")
+          .getPublicUrl(
+            filePath
+          );
+
 
       imageUrl =
         publicData.publicUrl;
+
     }
+
 
     const {
       error
-    } = await supabaseClient
-      .from("products")
-      .insert([
-        {
+    } =
+      await supabaseClient
+        .from("products")
+        .insert([{
+
           Name: name,
-          Price: Number(price),
-          Description: description,
-          stock: Number(stock),
-          image_url: imageUrl
-        }
-      ]);
+
+          Price:
+            Number(price),
+
+          Description:
+            description,
+
+          stock:
+            Number(stock),
+
+          image_url:
+            imageUrl
+
+        }]);
+
 
     if (error) {
 
       console.error(
-        "Product insert error:",
+        "PRODUCT INSERT ERROR:",
         error
       );
 
@@ -834,39 +1172,55 @@ async function saveProduct() {
       return;
     }
 
+
     alert(
       "محصول با موفقیت اضافه شد 🎀"
     );
 
-    document.getElementById("product-name").value = "";
-    document.getElementById("product-price").value = "";
-    document.getElementById("product-description").value = "";
-    document.getElementById("product-stock").value = "";
+
+    document
+      .getElementById("product-name")
+      .value = "";
+
+
+    document
+      .getElementById("product-price")
+      .value = "";
+
+
+    document
+      .getElementById("product-description")
+      .value = "";
+
+
+    document
+      .getElementById("product-stock")
+      .value = "";
+
 
     if (imageInput) {
+
       imageInput.value = "";
+
     }
+
 
     await loadProducts();
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "SAVE PRODUCT ERROR:",
+      error
+    );
 
     alert(
       "خطایی هنگام ذخیره محصول رخ داد."
     );
 
-  } finally {
-
-    if (saveButton) {
-
-      saveButton.disabled = false;
-
-      saveButton.textContent =
-        "ذخیره محصول";
-    }
   }
+
 }
 
 
@@ -877,12 +1231,20 @@ async function saveProduct() {
 async function loadOrders() {
 
   const container =
-    document.getElementById("orders-container");
+    document.getElementById(
+      "orders-container"
+    );
+
 
   if (!container) return;
 
-  container.innerHTML =
-    "<p>در حال دریافت سفارش‌ها...</p>";
+
+  container.innerHTML = `
+    <p>
+      در حال دریافت سفارش‌ها...
+    </p>
+  `;
+
 
   try {
 
@@ -890,7 +1252,11 @@ async function loadOrders() {
       data: {
         session
       }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
 
     if (
       !session ||
@@ -898,135 +1264,206 @@ async function loadOrders() {
       session.user.id !== ADMIN_ID
     ) {
 
-      container.innerHTML =
-        "<p>برای دیدن سفارش‌ها باید وارد مدیر شوید.</p>";
+      container.innerHTML = `
+        <p>
+          برای دیدن سفارش‌ها باید وارد مدیریت شوید.
+        </p>
+      `;
 
       return;
     }
+
 
     const {
       data,
       error
-    } = await supabaseClient
-      .from("orders")
-      .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+    } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
+
 
     if (error) {
 
       console.error(
-        "Orders error:",
+        "ORDERS ERROR:",
         error
       );
 
-      container.innerHTML =
-        "<p>دریافت سفارش‌ها با مشکل مواجه شد.</p>";
+      container.innerHTML = `
+        <p>
+          دریافت سفارش‌ها با مشکل مواجه شد.
+        </p>
+      `;
 
       return;
     }
 
-    if (!data || data.length === 0) {
 
-      container.innerHTML =
-        "<p>هنوز سفارشی ثبت نشده ♡</p>";
+    if (
+      !data ||
+      data.length === 0
+    ) {
+
+      container.innerHTML = `
+        <p>
+          هنوز سفارشی ثبت نشده ♡
+        </p>
+      `;
 
       return;
     }
+
 
     container.innerHTML = "";
+
 
     data.forEach(order => {
 
       const card =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       card.className =
         "order-card";
 
+
       let itemsHtml = "";
 
-      if (Array.isArray(order.items)) {
+
+      if (
+        Array.isArray(order.items)
+      ) {
 
         itemsHtml =
           order.items
             .map(item => `
               <div>
-                ${escapeHtml(item.name || "محصول")}
+                ${escapeHtml(
+                  item.name ||
+                  "محصول"
+                )}
                 ×
-                ${Number(item.quantity || 1).toLocaleString("fa-IR")}
+                ${Number(
+                  item.quantity || 1
+                ).toLocaleString("fa-IR")}
               </div>
             `)
             .join("");
+
       }
+
 
       const createdDate =
         order.created_at
           ? new Date(
               order.created_at
-            ).toLocaleString("fa-IR")
+            ).toLocaleString(
+              "fa-IR"
+            )
           : "";
 
+
       card.innerHTML = `
+
         <div class="order-card-inner">
 
           <h4>
             سفارش #${order.id}
           </h4>
 
+
           <p>
             👤
-            ${escapeHtml(order.first_name || "")}
-            ${escapeHtml(order.last_name || "")}
+            ${escapeHtml(
+              order.first_name || ""
+            )}
+            ${escapeHtml(
+              order.last_name || ""
+            )}
           </p>
+
 
           <p>
             📱
-            ${escapeHtml(order.phone || "")}
+            ${escapeHtml(
+              order.phone || ""
+            )}
           </p>
+
 
           <p>
             📍
-            ${escapeHtml(order.province || "")}
+            ${escapeHtml(
+              order.province || ""
+            )}
             -
-            ${escapeHtml(order.city || "")}
+            ${escapeHtml(
+              order.city || ""
+            )}
           </p>
+
 
           <p>
             🏠
-            ${escapeHtml(order.address || "")}
+            ${escapeHtml(
+              order.address || ""
+            )}
           </p>
+
 
           <p>
             📮
-            ${escapeHtml(order.postal_code || "")}
+            ${escapeHtml(
+              order.postal_code || ""
+            )}
           </p>
 
+
           <div class="order-items">
-            <strong>محصولات:</strong>
+
+            <strong>
+              محصولات:
+            </strong>
+
             ${itemsHtml}
+
           </div>
+
 
           <p>
             💰
             <strong>
-              ${formatPrice(order.total)}
+              ${formatPrice(
+                order.total
+              )}
             </strong>
           </p>
+
 
           <p>
             🕐
             ${createdDate}
           </p>
 
-          <div style="
-            margin-top:12px;
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-            align-items:center;
-          ">
+
+          <div
+            style="
+              margin-top:12px;
+              display:flex;
+              gap:8px;
+              flex-wrap:wrap;
+              align-items:center;
+            "
+          >
 
             <select
               id="status-${order.id}"
@@ -1037,40 +1474,92 @@ async function loadOrders() {
               "
             >
 
-              <option value="در انتظار بررسی"
-                ${order.status === "در انتظار بررسی" ? "selected" : ""}>
+              <option
+                value="در انتظار بررسی"
+                ${
+                  order.status ===
+                  "در انتظار بررسی"
+                    ? "selected"
+                    : ""
+                }
+              >
                 در انتظار بررسی
               </option>
 
-              <option value="تأیید شد"
-                ${order.status === "تأیید شد" ? "selected" : ""}>
+
+              <option
+                value="تأیید شد"
+                ${
+                  order.status ===
+                  "تأیید شد"
+                    ? "selected"
+                    : ""
+                }
+              >
                 تأیید شد
               </option>
 
-              <option value="در حال آماده‌سازی"
-                ${order.status === "در حال آماده‌سازی" ? "selected" : ""}>
+
+              <option
+                value="در حال آماده‌سازی"
+                ${
+                  order.status ===
+                  "در حال آماده‌سازی"
+                    ? "selected"
+                    : ""
+                }
+              >
                 در حال آماده‌سازی
               </option>
 
-              <option value="ارسال شد"
-                ${order.status === "ارسال شد" ? "selected" : ""}>
+
+              <option
+                value="ارسال شد"
+                ${
+                  order.status ===
+                  "ارسال شد"
+                    ? "selected"
+                    : ""
+                }
+              >
                 ارسال شد
               </option>
 
-              <option value="تحویل داده شد"
-                ${order.status === "تحویل داده شد" ? "selected" : ""}>
+
+              <option
+                value="تحویل داده شد"
+                ${
+                  order.status ===
+                  "تحویل داده شد"
+                    ? "selected"
+                    : ""
+                }
+              >
                 تحویل داده شد
               </option>
 
-              <option value="لغو شد"
-                ${order.status === "لغو شد" ? "selected" : ""}>
+
+              <option
+                value="لغو شد"
+                ${
+                  order.status ===
+                  "لغو شد"
+                    ? "selected"
+                    : ""
+                }
+              >
                 لغو شد
               </option>
 
             </select>
 
+
             <button
-              onclick="updateOrderStatus(${order.id})"
+              onclick="
+                updateOrderStatus(
+                  ${order.id}
+                )
+              "
               class="admin-save-btn"
             >
               ذخیره وضعیت
@@ -1079,18 +1568,32 @@ async function loadOrders() {
           </div>
 
         </div>
+
       `;
 
-      container.appendChild(card);
+
+      container.appendChild(
+        card
+      );
+
     });
+
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "LOAD ORDERS ERROR:",
+      error
+    );
 
-    container.innerHTML =
-      "<p>خطایی هنگام دریافت سفارش‌ها رخ داد.</p>";
+    container.innerHTML = `
+      <p>
+        خطایی هنگام دریافت سفارش‌ها رخ داد.
+      </p>
+    `;
+
   }
+
 }
 
 
@@ -1098,17 +1601,22 @@ async function loadOrders() {
    UPDATE ORDER STATUS
 ========================================= */
 
-async function updateOrderStatus(orderId) {
+async function updateOrderStatus(
+  orderId
+) {
 
   const select =
     document.getElementById(
       `status-${orderId}`
     );
 
+
   if (!select) return;
+
 
   const newStatus =
     select.value;
+
 
   try {
 
@@ -1116,7 +1624,11 @@ async function updateOrderStatus(orderId) {
       data: {
         session
       }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
 
     if (
       !session ||
@@ -1131,14 +1643,20 @@ async function updateOrderStatus(orderId) {
       return;
     }
 
+
     const {
       error
-    } = await supabaseClient
-      .from("orders")
-      .update({
-        status: newStatus
-      })
-      .eq("id", orderId);
+    } =
+      await supabaseClient
+        .from("orders")
+        .update({
+          status: newStatus
+        })
+        .eq(
+          "id",
+          orderId
+        );
+
 
     if (error) {
 
@@ -1151,11 +1669,14 @@ async function updateOrderStatus(orderId) {
       return;
     }
 
+
     alert(
       "وضعیت سفارش تغییر کرد ✅"
     );
 
+
     await loadOrders();
+
 
   } catch (error) {
 
@@ -1164,7 +1685,9 @@ async function updateOrderStatus(orderId) {
     alert(
       "خطایی رخ داد."
     );
+
   }
+
 }
 
 
@@ -1174,13 +1697,18 @@ async function updateOrderStatus(orderId) {
 
 async function adminLogout() {
 
-  await supabaseClient.auth.signOut();
+  await supabaseClient
+    .auth
+    .signOut();
+
 
   closeAdminPanel();
+
 
   alert(
     "از پنل مدیریت خارج شدی."
   );
+
 }
 
 
@@ -1193,18 +1721,25 @@ document.addEventListener(
   function(event) {
 
     const modals =
-      document.querySelectorAll(".modal");
+      document.querySelectorAll(
+        ".modal"
+      );
+
 
     modals.forEach(modal => {
 
-      if (event.target === modal) {
+      if (
+        event.target === modal
+      ) {
 
         modal.classList.remove(
           "active"
         );
+
       }
 
     });
+
   }
 );
 
@@ -1222,15 +1757,19 @@ document.addEventListener(
         "checkout-form"
       );
 
+
     if (checkoutForm) {
 
       checkoutForm.addEventListener(
         "submit",
         submitOrder
       );
+
     }
 
+
     loadProducts();
+
 
     updateCart();
 

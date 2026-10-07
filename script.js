@@ -7,6 +7,7 @@ const SUPABASE_URL =
 
 const SUPABASE_KEY =
   "sb_publishable_-mb1R7J32iEeWMMx-RNlbg_1PhNBKAR";
+
 const ADMIN_ID =
   "ac82e56f-d171-402e-a0f6-8664ec1be7ba";
 
@@ -172,7 +173,7 @@ async function loadProducts() {
             ? `
               <img
                 class="product-image"
-                src="${image}"
+                src="${escapeHtml(image)}"
                 alt="${escapeHtml(name)}"
                 style="
                   width:100%;
@@ -180,10 +181,6 @@ async function loadProducts() {
                   object-fit:cover;
                   display:block;
                   border-radius:16px 16px 0 0;
-                "
-                onerror="
-                  this.onerror=null;
-                  this.src='https://placehold.co/600x600/f8f3f5/9b7b85?text=Luna+Girl';
                 "
               >
             `
@@ -451,7 +448,7 @@ function updateCart() {
         image
           ? `
             <img
-              src="${image}"
+              src="${escapeHtml(image)}"
               alt=""
               style="
                 width:70px;

@@ -548,3 +548,9 @@ align-items: flex-start;
 flex-direction: column;
 }
 }
+@media (max-width: 700px) {
+  .admin-btn {
+    display: inline-flex !important;
+    visibility: visible !important;
+  }
+}
